@@ -88,7 +88,7 @@ function HostLoginPage({ showToast }) {
             marginBottom: '12px'
           }}>
             {tab === 'signin' ? 'Welcome Back,' : 'Join as a'}<br />
-            <em style={{ color: 'var(--gold-light)' }}>Host.</em>
+            <em style={{ color: 'var(--gold-light)' }}> Host</em>
           </h1>
           <p style={{
             color: 'rgba(255,255,255,0.5)',

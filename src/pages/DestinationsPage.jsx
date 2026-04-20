@@ -3,14 +3,14 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const destinationsData = [
-  { name: 'Bali', country: 'Indonesia', stays: '1,240', img: 'https://picsum.photos/id/127/800/520', emoji: '🌴', size: 'large' },
-  { name: 'Paris', country: 'France', stays: '870', img: 'https://picsum.photos/id/30/600/400', emoji: '🗼', size: 'small' },
-  { name: 'Santorini', country: 'Greece', stays: '430', img: 'https://picsum.photos/id/20/600/400', emoji: '🏔️', size: 'small' },
-  { name: 'Kyoto', country: 'Japan', stays: '650', img: 'https://picsum.photos/id/96/600/400', emoji: '🌸', size: 'small' },
-  { name: 'New York', country: 'USA', stays: '2,100', img: 'https://picsum.photos/id/1/600/400', emoji: '🗽', size: 'small' },
-  { name: 'Amalfi Coast', country: 'Italy', stays: '380', img: 'https://picsum.photos/id/104/600/400', emoji: '🍋', size: 'medium' },
-  { name: 'Tokyo', country: 'Japan', stays: '1,560', img: 'https://picsum.photos/id/37/600/400', emoji: '🏙️', size: 'medium' },
-  { name: 'Cape Town', country: 'South Africa', stays: '490', img: 'https://picsum.photos/id/29/600/400', emoji: '🌊', size: 'medium' },
+  { name: 'Algiers', country: 'Algeria', stays: '1,240', img: '/photos/w1.jpg', emoji: '🌴', size: 'large' },
+  { name: 'Oran', country: 'Algeria', stays: '870', img: '/photos/w2.jpg', emoji: '🗼', size: 'small' },
+  { name: 'Jijel', country: 'Algeria', stays: '430', img: '/photos/w3.jpg', emoji: '🏔️', size: 'small' },
+  { name: 'Constantine', country: 'Algeria', stays: '650', img: '/photos/w4.jpg', emoji: '🌸', size: 'small' },
+  { name: 'Bijaia', country: 'Algeria', stays: '2,100', img: '/photos/w5.jpg', emoji: '🗽', size: 'small' },
+  { name: 'Annaba', country: 'Algeria', stays: '380', img: '/photos/w6.jpg', emoji: '🍋', size: 'medium' },
+  { name: 'Gerdaya', country: 'Algeria', stays: '1,560', img: '/photos/w7.jpg', emoji: '🏙️', size: 'medium' },
+  { name: 'Tipaza', country: 'Algeria', stays: '490', img: '/photos/w8.jpg', emoji: '🌊', size: 'medium' },
 ];
 
 function DestinationsPage({ showToast }) {
@@ -51,47 +51,47 @@ function DestinationsPage({ showToast }) {
       {/* Main featured grid */}
       <section id="destinations" style={{ background: 'var(--cream)' }}>
         <div className="destinations-grid">
-          <div className="dest-card fade-up" onClick={() => { showToast('🌴 Exploring Bali...'); navigate('/stays'); }}>
+          <div className="dest-card fade-up" onClick={() => { showToast('🌴 Exploring Oran...'); navigate('/stays'); }}>
             <div className="dest-img-wrap" style={{ height: '520px' }}>
-              <img src="https://picsum.photos/id/127/800/520" alt="Bali" className="dest-img" />
+              <img src="/photos/w1.jpg" alt="Algiers" className="dest-img" />
               <div className="dest-overlay">
-                <div className="dest-name">Bali</div>
+                <div className="dest-name">Algiers</div>
                 <div className="dest-count">1,240 stays available</div>
               </div>
             </div>
           </div>
-          <div className="dest-card fade-up" onClick={() => { showToast('🗼 Exploring Paris...'); navigate('/stays'); }}>
+          <div className="dest-card fade-up" onClick={() => { showToast('🗼 Exploring Oran...'); navigate('/stays'); }}>
             <div className="dest-img-wrap">
-              <img src="https://picsum.photos/id/30/600/240" alt="Paris" className="dest-img" />
+              <img src="/photos/w2.jpg" alt="Oran" className="dest-img" />
               <div className="dest-overlay">
-                <div className="dest-name">Paris</div>
+                <div className="dest-name">Oran</div>
                 <div className="dest-count">870 stays available</div>
               </div>
             </div>
           </div>
-          <div className="dest-card fade-up" onClick={() => { showToast('🏔️ Exploring Santorini...'); navigate('/stays'); }}>
+          <div className="dest-card fade-up" onClick={() => { showToast('🏔️ Exploring Jijel...'); navigate('/stays'); }}>
             <div className="dest-img-wrap">
-              <img src="https://picsum.photos/id/20/600/240" alt="Santorini" className="dest-img" />
+              <img src="/photos/w3.jpg" alt="Santorini" className="dest-img" />
               <div className="dest-overlay">
-                <div className="dest-name">Santorini</div>
+                <div className="dest-name">Jijel</div>
                 <div className="dest-count">430 stays available</div>
               </div>
             </div>
           </div>
-          <div className="dest-card fade-up" onClick={() => { showToast('🌸 Exploring Kyoto...'); navigate('/stays'); }}>
+          <div className="dest-card fade-up" onClick={() => { showToast('🌸 Exploring Constantine...'); navigate('/stays'); }}>
             <div className="dest-img-wrap">
-              <img src="https://picsum.photos/id/96/600/240" alt="Kyoto" className="dest-img" />
+              <img src="/photos/w4.jpg" alt="Constanitne" className="dest-img" />
               <div className="dest-overlay">
-                <div className="dest-name">Kyoto</div>
+                <div className="dest-name">Constantine</div>
                 <div className="dest-count">650 stays available</div>
               </div>
             </div>
           </div>
-          <div className="dest-card fade-up" onClick={() => { showToast('🗽 Exploring New York...'); navigate('/stays'); }}>
+          <div className="dest-card fade-up" onClick={() => { showToast('🗽 Exploring Bijaia...'); navigate('/stays'); }}>
             <div className="dest-img-wrap">
-              <img src="https://picsum.photos/id/1/600/240" alt="New York" className="dest-img" />
+              <img src="/photos/w5.jpg" alt="Bijaia" className="dest-img" />
               <div className="dest-overlay">
-                <div className="dest-name">New York</div>
+                <div className="dest-name">Bijaia</div>
                 <div className="dest-count">2,100 stays available</div>
               </div>
             </div>
