@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
-
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
@@ -26,6 +25,7 @@ function ScrollToTop() {
 }
 
 function AppInner() {
+  const location = useLocation();
   const [modalOpen, setModalOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
@@ -110,7 +110,7 @@ function AppInner() {
       <div className={`cursor-ring ${cursorHover ? 'hovering' : ''}`} style={{ left: ringPos.x, top: ringPos.y }} />
 
       <ScrollToTop />
-      <Navbar scrolled={scrolled} onOpenModal={openModal} />
+      <Navbar scrolled={scrolled || location.pathname !== '/'} onOpenModal={openModal} />
 
       <Routes>
         <Route path="/" element={<HomePage showToast={showToast} />} />
