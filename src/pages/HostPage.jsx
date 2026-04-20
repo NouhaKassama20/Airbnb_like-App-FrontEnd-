@@ -84,7 +84,7 @@ function HostPage({ showToast }) {
           </button>
         </div>
         <div className="host-img-wrap fade-up">
-          <img src="https://picsum.photos/id/15/800/1000" alt="Host" className="host-img" />
+          <img src="/photos/hostpage.jpg" alt="Host" className="host-img" />
           <div className="host-earn-badge">
             <div className="host-earn-num">$3,200</div>
             <div className="host-earn-label">avg. monthly</div>
