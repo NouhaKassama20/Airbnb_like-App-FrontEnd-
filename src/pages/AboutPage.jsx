@@ -16,7 +16,7 @@ export default function AboutPage() {
           We believe travel should feel <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>extraordinary.</em>
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '18px', maxWidth: '560px', margin: '0 auto', lineHeight: 1.7 ,fontFamily: "'Cormorant Garamond', serif", }}>
-          NestAway was founded on a simple idea: the places we stay shape the memories we make. So we set out to build something better.
+          Mabiti'i was founded on a simple idea: the places we stay shape the memories we make. So we set out to build something better.
         </p>
       </section>
 
