@@ -38,7 +38,7 @@ function Footer({ showToast }) {
         <div className="footer-col">
           <h5>Company</h5>
           <ul>
-            <li><a href="#">About Us</a></li>
+            <li><Link to="/about">About Us</Link></li>      
             <li><a href="#">Careers</a></li>
             <li><a href="#">Press Room</a></li>
             <li><a href="#">Trust & Safety</a></li>
