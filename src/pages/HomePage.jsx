@@ -95,31 +95,7 @@ function HomePage({ showToast }) {
           </h1>
           <p className="hero-sub">Discover handpicked homes, villas & experiences crafted for those who travel with intention.</p>
 
-          <div className="search-box">
-            <div className="search-field-wrap">
-              <label>Destination</label>
-              <input type="text" placeholder="Where are you going?" id="destInput" />
-            </div>
-            <div className="search-field-wrap">
-              <label>Check In</label>
-              <input type="date" id="checkinInput" />
-            </div>
-            <div className="search-field-wrap">
-              <label>Check Out</label>
-              <input type="date" id="checkoutInput" />
-            </div>
-            <div className="search-field-wrap" style={{ borderRight: 'none', maxWidth: '100px' }}>
-              <label>Guests</label>
-              <input type="number" placeholder="2" min="1" max="20" defaultValue="2" id="guestsInput" />
-            </div>
-            <button className="search-btn" onClick={handleSearch}>
-              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <circle cx="11" cy="11" r="7" strokeWidth="2" />
-                <path d="M21 21l-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-              Search
-            </button>
-          </div>
+          //Search goes here 
 
           <div className="hero-stats">
             <div className="hero-stat">
