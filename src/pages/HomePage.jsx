@@ -193,6 +193,7 @@ function HomePage({ showToast }) {
         </div>
       </section>
 
+
       {/* TESTIMONIALS */}
       <section className="testimonials-section">
         <div className="section-header" style={{ textAlign: 'center', marginBottom: '60px' }}>
