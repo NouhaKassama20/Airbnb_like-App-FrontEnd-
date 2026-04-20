@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { testimonialsData } from '../data/data';
+import { Link } from 'react-router-dom';
 
 function HomePage({ showToast }) {
   const navigate = useNavigate();
@@ -168,7 +169,23 @@ function HomePage({ showToast }) {
                 <div className="editorial-feature-text"><h4>Authentic Community</h4><p>Real reviews from real guests. No paid placements, no fake stars.</p></div>
               </div>
             </div>
-            <button className="btn-gold">Learn More About Us</button>
+            <Link
+  to="/about"
+  style={{
+    display: 'inline-block',
+    padding: '16px 36px',
+    background: 'var(--gold)',
+    color: 'var(--navy)',
+    borderRadius: '50px',
+    fontWeight: 700,
+    fontSize: '15px',
+    textDecoration: 'none',
+    fontFamily: 'inherit',
+    letterSpacing: '0.03em',
+  }}
+>
+  Learn More About Us
+</Link>
           </div>
         </div>
       </section>

@@ -15,6 +15,7 @@ import DestinationsPage from './pages/DestinationsPage';
 import ExperiencesPage from './pages/ExperiencesPage';
 import HostPage from './pages/HostPage';
 import PropertyDetailPage from './pages/PropertyDetailPage';
+import AboutPage from './pages/AboutPage';
 
 import { listingsData } from './data/data';
 
@@ -118,6 +119,7 @@ function AppInner() {
         <Route path="/experiences" element={<ExperiencesPage showToast={showToast} />} />
         <Route path="/host" element={<HostPage showToast={showToast} />} />
         <Route path="/property/:id" element={<PropertyDetailPage showToast={showToast} onOpenBooking={openBooking} />} />
+        <Route path="/about" element={<AboutPage />} />
       </Routes>
 
       <Footer showToast={showToast} />
