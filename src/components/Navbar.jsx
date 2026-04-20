@@ -8,8 +8,9 @@ function Navbar({ scrolled, onOpenModal }) {
   return (
     <nav className={scrolled ? 'scrolled' : ''}>
       <Link to="/" className="nav-logo">
-        <span className="logo-icon">⌂</span>
-        Nest<span>Away</span>
+        <span className="logo-icon">        <img src="/photos/logo2.png"  alt="MyHomeCity Logo" className="logo-img"  />
+</span>
+        Mabiti'<span>i</span>
       </Link>
       <ul className="nav-links">
         <li><Link to="/stays" className={location.pathname === '/stays' ? 'active-link' : ''}>Stays</Link></li>
