@@ -13,6 +13,8 @@ import StaysPage from './pages/StaysPage';
 import DestinationsPage from './pages/DestinationsPage';
 import ExperiencesPage from './pages/ExperiencesPage';
 import HostPage from './pages/HostPage';
+import HostLoginPage from './pages/HostLoginPage';
+import HostSetupPage from './pages/HostSetupPage'
 import PropertyDetailPage from './pages/PropertyDetailPage';
 import AboutPage from './pages/AboutPage';
 
@@ -118,6 +120,8 @@ function AppInner() {
         <Route path="/destinations" element={<DestinationsPage showToast={showToast} />} />
         <Route path="/experiences" element={<ExperiencesPage showToast={showToast} />} />
         <Route path="/host" element={<HostPage showToast={showToast} />} />
+        <Route path="/host/login" element={<HostLoginPage showToast={showToast} />} />
+        <Route path="/host/setup" element={<HostSetupPage showToast={showToast} />} />
         <Route path="/property/:id" element={<PropertyDetailPage showToast={showToast} onOpenBooking={openBooking} />} />
         <Route path="/about" element={<AboutPage />} />
       </Routes>

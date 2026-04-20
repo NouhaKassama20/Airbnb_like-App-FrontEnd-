@@ -1,7 +1,13 @@
 // src/pages/HostPage.jsx
 import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function HostPage({ showToast }) {
+  const navigate = useNavigate();
+
+  const handleStartHosting = () => {
+    navigate('/host/login');
+  };
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry, i) => {
@@ -35,7 +41,7 @@ function HostPage({ showToast }) {
         <button
           className="btn-gold"
           style={{ marginTop: '40px' }}
-          onClick={() => showToast('✨ Redirecting to host onboarding...')}
+          onClick={handleStartHosting}
         >
           Start Hosting Today
         </button>
@@ -70,7 +76,7 @@ function HostPage({ showToast }) {
               </div>
             </div>
           </div>
-          <button className="btn-navy" onClick={() => showToast('✨ Redirecting to host onboarding...')}>
+          <button className="btn-navy" onClick={handleStartHosting}>
             Start Hosting
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path d="M5 12h14M12 5l7 7-7 7" strokeWidth="2" strokeLinecap="round" />
