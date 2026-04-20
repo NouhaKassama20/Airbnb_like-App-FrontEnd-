@@ -46,6 +46,7 @@ export const listingsData = [
   { id: 6, name: 'Brooklyn Loft Living', location: 'New York, USA', price: 195, rating: 4.88, reviews: 702, img: 'https://images.unsplash.com/photo-1617098709804-705581f844eb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Terrace', 'Artistic', 'Central'], badge: null, category: 'city' },
   { id: 7, name: 'Coastal Pine Cabin', location: 'Oregon, USA', price: 145, rating: 4.93, reviews: 287, img: 'https://images.unsplash.com/photo-1505409628601-edc9af17fda6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Beach', 'Fireplace', 'Remote'], badge: null, category: 'cabin' },
   { id: 8, name: 'Paris Haussmann Flat', location: 'Le Marais, Paris', price: 275, rating: 4.95, reviews: 412, img: 'https://plus.unsplash.com/premium_photo-1670076513880-f58e3c377903?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Balcony', 'Historic', 'Central'], badge: 'Top Rated', category: 'city' },
+
 ];
 
 export const experiencesData = [

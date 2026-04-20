@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { testimonialsData } from '../data/data';
+import { Link } from 'react-router-dom';
 
 function HomePage({ showToast }) {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ function HomePage({ showToast }) {
   }, []);
 
   useEffect(() => {
-    const targets = { stays: 2.4, countries: 190, rating: 4.9 };
+    const targets = { stays: 600, countries: 58, rating: 4.9 };
     const steps = { stays: targets.stays / 60, countries: targets.countries / 60, rating: targets.rating / 60 };
     let current = { stays: 0, countries: 0, rating: 0 };
     const interval = setInterval(() => {
@@ -89,22 +90,23 @@ function HomePage({ showToast }) {
           <div className="hero-particles" id="particles"></div>
         </div>
         <div className="hero-content">
-          <div className="hero-eyebrow">Haya Nabdawwww</div>
+          <div className="hero-eyebrow">Rent or buy with ease.</div>
           <h1 className="hero-title">
-            Where Every Journey<br />Becomes a <em>Story</em>
+           We help you feel<br /> at  <em>Home</em>
           </h1>
-          <p className="hero-sub">Discover handpicked homes, villas & experiences crafted for those who travel with intention.</p>
+          <p className="hero-sub">Discover apartments, houses, and villas for short stays or long-term living.
+    </p>
 
           //Search goes here 
 
           <div className="hero-stats">
             <div className="hero-stat">
               <div className="hero-stat-num">{counters.stays}</div>
-              <div className="hero-stat-label">Million Stays</div>
+              <div className="hero-stat-label">Houses</div>
             </div>
             <div className="hero-stat">
               <div className="hero-stat-num">{counters.countries}</div>
-              <div className="hero-stat-label">Countries</div>
+              <div className="hero-stat-label">Wilayas</div>
             </div>
             <div className="hero-stat">
               <div className="hero-stat-num">{counters.rating}</div>
@@ -122,12 +124,14 @@ function HomePage({ showToast }) {
       <section className="editorial-section">
         <div className="editorial-grid">
           <div className="editorial-img-wrap fade-up">
-            <img src="https://picsum.photos/id/104/800/960" alt="Luxury Villa" className="editorial-img" />
+           <img src="/photos/home.jpg" alt="Luxury Villa" className="editorial-img" />  
+
             <div className="editorial-img-overlay"></div>
-            <div className="editorial-img-tag">"A place that feels<br />like it was made<br />just for you."</div>
+                        <div className="editorial-img-tag">"A place that feels like it was made<br />just for you."</div>
+
           </div>
           <div className="editorial-content fade-up">
-            <div className="section-eyebrow">The NestAway Difference</div>
+            <div className="section-eyebrow"> Mabit'i</div>
             <h2 className="section-title">More Than a Rental.<br />It's an <em>Experience</em>.</h2>
             <p className="section-sub" style={{ color: 'rgba(255,255,255,0.5)' }}>We handpick every property, verify every host, and ensure your stay exceeds every expectation.</p>
             <div className="editorial-features">
@@ -144,10 +148,29 @@ function HomePage({ showToast }) {
                 <div className="editorial-feature-text"><h4>Authentic Community</h4><p>Real reviews from real guests. No paid placements, no fake stars.</p></div>
               </div>
             </div>
-            <button className="btn-gold">Learn More About Us</button>
+  <Link
+  to="/about"
+  style={{
+    display: 'inline-block',
+    padding: '12px 28px',
+    background: 'var(--gold)',
+    color: 'var(--navy)',
+    borderRadius: '50px',
+    fontWeight: 600,
+    fontSize: '14px',
+    textDecoration: 'none',
+    fontFamily: 'inherit',
+    letterSpacing: '0.02em',
+    position: 'relative',
+    boxShadow: '0 0 18px 4px rgba(201,168,76,0.35), 0 0 40px 8px rgba(201,168,76,0.15)',
+  }}
+>
+  Learn More About Us
+</Link>
           </div>
         </div>
       </section>
+
 
       {/* TESTIMONIALS */}
       <section className="testimonials-section">

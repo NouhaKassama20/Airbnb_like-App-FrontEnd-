@@ -2034,3 +2034,10 @@ footer {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ===== LOGO IMAGE ===== */
+.logo-img {
+  height: 60px;   /* ajuste la taille du logo */
+  width: auto;    /* conserve les proportions */
+  display: block; /* évite les décalages verticaux */
+}

@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
-
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
@@ -14,7 +13,10 @@ import StaysPage from './pages/StaysPage';
 import DestinationsPage from './pages/DestinationsPage';
 import ExperiencesPage from './pages/ExperiencesPage';
 import HostPage from './pages/HostPage';
+import HostLoginPage from './pages/HostLoginPage';
+import HostSetupPage from './pages/HostSetupPage'
 import PropertyDetailPage from './pages/PropertyDetailPage';
+import AboutPage from './pages/AboutPage';
 
 import { listingsData } from './data/data';
 
@@ -25,6 +27,7 @@ function ScrollToTop() {
 }
 
 function AppInner() {
+  const location = useLocation();
   const [modalOpen, setModalOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [selectedListing, setSelectedListing] = useState(null);
@@ -109,7 +112,7 @@ function AppInner() {
       <div className={`cursor-ring ${cursorHover ? 'hovering' : ''}`} style={{ left: ringPos.x, top: ringPos.y }} />
 
       <ScrollToTop />
-      <Navbar scrolled={scrolled} onOpenModal={openModal} />
+      <Navbar scrolled={scrolled || location.pathname !== '/'} onOpenModal={openModal} />
 
       <Routes>
         <Route path="/" element={<HomePage showToast={showToast} />} />
@@ -117,7 +120,10 @@ function AppInner() {
         <Route path="/destinations" element={<DestinationsPage showToast={showToast} />} />
         <Route path="/experiences" element={<ExperiencesPage showToast={showToast} />} />
         <Route path="/host" element={<HostPage showToast={showToast} />} />
+        <Route path="/host/login" element={<HostLoginPage showToast={showToast} />} />
+        <Route path="/host/setup" element={<HostSetupPage showToast={showToast} />} />
         <Route path="/property/:id" element={<PropertyDetailPage showToast={showToast} onOpenBooking={openBooking} />} />
+        <Route path="/about" element={<AboutPage />} />
       </Routes>
 
       <Footer showToast={showToast} />
