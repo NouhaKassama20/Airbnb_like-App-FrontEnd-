@@ -172,19 +172,21 @@ function HomePage({ showToast }) {
                 <div className="editorial-feature-text"><h4>Authentic Community</h4><p>Real reviews from real guests. No paid placements, no fake stars.</p></div>
               </div>
             </div>
-            <Link
+  <Link
   to="/about"
   style={{
     display: 'inline-block',
-    padding: '16px 36px',
+    padding: '12px 28px',
     background: 'var(--gold)',
     color: 'var(--navy)',
     borderRadius: '50px',
-    fontWeight: 700,
-    fontSize: '15px',
+    fontWeight: 600,
+    fontSize: '14px',
     textDecoration: 'none',
     fontFamily: 'inherit',
-    letterSpacing: '0.03em',
+    letterSpacing: '0.02em',
+    position: 'relative',
+    boxShadow: '0 0 18px 4px rgba(201,168,76,0.35), 0 0 40px 8px rgba(201,168,76,0.15)',
   }}
 >
   Learn More About Us
