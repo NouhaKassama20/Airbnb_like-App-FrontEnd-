@@ -89,7 +89,7 @@ function HomePage({ showToast }) {
           <div className="hero-particles" id="particles"></div>
         </div>
         <div className="hero-content">
-          <div className="hero-eyebrow">Haya Nabdawwww</div>
+          <div className="hero-eyebrow">Welcome Here</div>
           <h1 className="hero-title">
             Where Every Journey<br />Becomes a <em>Story</em>
           </h1>
