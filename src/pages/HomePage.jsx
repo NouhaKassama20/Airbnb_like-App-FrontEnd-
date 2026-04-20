@@ -148,9 +148,11 @@ function HomePage({ showToast }) {
       <section className="editorial-section">
         <div className="editorial-grid">
           <div className="editorial-img-wrap fade-up">
-            <img src="/photos/homepage.jpg" alt="Luxury Villa" className="editorial-img" />
+           <img src="/photos/home.jpg" alt="Luxury Villa" className="editorial-img" />  
+
             <div className="editorial-img-overlay"></div>
-            <div className="editorial-img-tag">"A place that feels<br />like it was made<br />just for you."</div>
+                        <div className="editorial-img-tag">"A place that feels like it was made<br />just for you."</div>
+
           </div>
           <div className="editorial-content fade-up">
             <div className="section-eyebrow"> Mabit'i</div>
