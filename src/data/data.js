@@ -57,10 +57,32 @@ export const experiencesData = [
 ];
 
 export const testimonialsData = [
-  { text: 'Everything about NestAway felt elevated — from the booking process to the villa itself. It was as if they read my mind.', name: 'Sophia Marchetti', loc: 'Milan, Italy', rating: 5, avatar: 'https://randomuser.me/api/portraits/women/44.jpg' },
-  { text: "I've used every travel platform there is. NestAway is in a different league entirely — the curation is exceptional.", name: 'James Okonkwo', loc: 'Lagos, Nigeria', rating: 5, avatar: 'https://randomuser.me/api/portraits/men/32.jpg' },
-  { text: 'The chalet in Zermatt was beyond anything I expected. The ski-in access and mountain views made it unforgettable.', name: 'Emilie Dumont', loc: 'Paris, France', rating: 5, avatar: 'https://randomuser.me/api/portraits/women/68.jpg' },
-  { text: 'As a remote worker, I need spaces that inspire. NestAway consistently delivers properties that make me want to stay forever.', name: 'Arjun Mehta', loc: 'Mumbai, India', rating: 5, avatar: 'https://randomuser.me/api/portraits/men/65.jpg' },
-  { text: 'Booked the Bali retreat for my anniversary. My partner cried when she saw the view. NestAway made magic happen.', name: 'David Chen', loc: 'San Francisco, USA', rating: 5, avatar: 'https://randomuser.me/api/portraits/men/11.jpg' },
-  { text: 'The attention to detail is remarkable. The host left a handwritten note and local wine — I felt genuinely welcomed.', name: 'Aya Tanaka', loc: 'Tokyo, Japan', rating: 5, avatar: 'https://randomuser.me/api/portraits/women/89.jpg' },
+  {
+    rating: 5,
+    text: "When my family wanted to spend a week in another wilaya, we had to rely on Facebook groups and endless phone calls. It took days to find something reliable.",
+    name: "Family from Constantine",
+    loc: "Constantine, Algeria",
+    avatar: "https://randomuser.me/api/portraits/women/44.jpg"
+  },
+  {
+    rating: 4,
+    text: "During my Sonatrach internship, I struggled to find a short-term rental. Agencies were expensive, and there was no trusted platform to compare options.",
+    name: "Engineering Student",
+    loc: "Algiers, Algeria",
+    avatar: "https://randomuser.me/api/portraits/men/32.jpg"
+  },
+  {
+    rating: 5,
+    text: "For my residency exam, I had to travel to Oran. Finding a safe and affordable apartment was stressful without a centralized solution.",
+    name: "Medical Student",
+    loc: "Oran, Algeria",
+    avatar: "https://randomuser.me/api/portraits/women/68.jpg"
+  },
+  {
+    rating: 4,
+    text: "I needed housing for a seminar. Hotels were too costly, and I wished there was a simple app to connect me directly with local hosts.",
+    name: "Professional",
+    loc: "Béjaïa, Algeria",
+    avatar: "https://randomuser.me/api/portraits/men/65.jpg"
+  }
 ];

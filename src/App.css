@@ -2344,3 +2344,43 @@ footer {
 .admin-complaints button:hover {
   background: #1e8449;
 }
+
+
+/* === OUR MISSION SECTION === */
+.mission-section {
+  background: var(--cream);
+  padding: 100px 48px;
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px;
+  margin-top: 40px;
+}
+
+.mission-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease;
+}
+
+.mission-card:hover {
+  transform: translateY(-6px);
+}
+
+.mission-card h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 12px;
+}
+
+.mission-card p {
+  font-size: 14px;
+  color: var(--text-mid);
+  line-height: 1.6;
+}

@@ -305,6 +305,72 @@ function HomePage({ showToast }) {
       </section>
 
 
+
+{/* FEATURED HOUSES */}
+<section className="featured-section fade-up">
+  <div className="section-header">
+    <div className="section-eyebrow">Featured</div>
+    <h2 className="section-title">Popular <em>Houses</em></h2>
+    <p className="section-sub">Discover top-rated properties across Algeria</p>
+  </div>
+
+  <div className="listings-grid">
+    <div className="listing-card">
+      <div className="listing-img-wrap">
+        <img src="/photos/house1.jpg" alt="Luxury Villa" className="listing-img" />
+        <div className="listing-badge">Featured</div>
+      </div>
+      <div className="listing-info">
+        <div className="listing-top">
+          <h3 className="listing-name">Luxury Villa in Algiers</h3>
+          <div className="listing-rating"><span className="star">★</span> 4.9</div>
+        </div>
+        <p className="listing-location">Algiers • 4 Bedrooms</p>
+        <div className="listing-footer">
+          <div className="listing-price">12,000,000 DZD </div>
+          <button className="book-btn">View</button>
+        </div>
+      </div>
+    </div>
+
+    <div className="listing-card">
+      <div className="listing-img-wrap">
+        <img src="/photos/house2.jpg" alt="Cozy Apartment" className="listing-img" />
+        <div className="listing-badge">Featured</div>
+      </div>
+      <div className="listing-info">
+        <div className="listing-top">
+          <h3 className="listing-name">Cozy Apartment in Oran</h3>
+          <div className="listing-rating"><span className="star">★</span> 4.7</div>
+        </div>
+        <p className="listing-location">Oran • 2 Bedrooms</p>
+        <div className="listing-footer">
+          <div className="listing-price">6,500,000 DZD </div>
+          <button className="book-btn">View</button>
+        </div>
+      </div>
+    </div>
+
+    <div className="listing-card">
+      <div className="listing-img-wrap">
+        <img src="/photos/house3.jpg" alt="Modern Loft" className="listing-img" />
+        <div className="listing-badge">Featured</div>
+      </div>
+      <div className="listing-info">
+        <div className="listing-top">
+          <h3 className="listing-name">Modern Loft in Béjaïa</h3>
+          <div className="listing-rating"><span className="star">★</span> 4.8</div>
+        </div>
+        <p className="listing-location">Béjaïa • 1 Bedroom</p>
+        <div className="listing-footer">
+          <div className="listing-price">4,200,000 DZD </div>
+          <button className="book-btn">View</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
       {/* TESTIMONIALS */}
       <section className="testimonials-section">
         <div className="section-header" style={{ textAlign: 'center', marginBottom: '60px' }}>
@@ -330,6 +396,37 @@ function HomePage({ showToast }) {
           </div>
         </div>
       </section>
+
+
+    {/* OUR MISSION SECTION */}
+<section className="mission-section">
+  <div className="section-header">
+    <div className="section-eyebrow">Our Mission</div>
+    <h2 className="section-title"><em>Mabiti'i</em> : A Platform Built for <em>Algerians</em></h2>
+    <p className="section-sub">
+      We believe finding housing for short stays, studies, or work in Algeria should be simple, safe, and centralized.
+      Our mission is to connect families, students, and professionals with trusted local hosts — without the stress of
+      Facebook groups or word-of-mouth.
+    </p>
+  </div>
+
+  <div className="mission-grid">
+    <div className="mission-card">
+      <h3>👨‍👩‍👧‍👦 For Families</h3>
+      <p>Plan vacations or visits to other wilayas with confidence, knowing you’ll find reliable homes quickly.</p>
+    </div>
+    <div className="mission-card">
+      <h3>🎓 For Students</h3>
+      <p>Secure short-term rentals during internships, exams, or residencies without wasting time or money.</p>
+    </div>
+    <div className="mission-card">
+      <h3>💼 For Professionals</h3>
+      <p>Book housing for seminars, medical visits, or temporary assignments with ease and transparency.</p>
+    </div>
+  </div>
+</section>
+
+
     </>
   );
 }
