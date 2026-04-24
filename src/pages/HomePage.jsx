@@ -8,6 +8,8 @@ function HomePage({ showToast }) {
   const navigate = useNavigate();
   const [counters, setCounters] = useState({ stays: 0, countries: 0, rating: 0 });
 
+  const [searchMode, setSearchMode] = useState('stays');
+
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     const checkinInput = document.getElementById('checkinInput');
@@ -68,18 +70,29 @@ function HomePage({ showToast }) {
     return () => observer.disconnect();
   }, []);
 
+  
   const handleSearch = () => {
-    const destInput = document.getElementById('destInput');
+  const destInput = document.getElementById('destInput');
+  const dest = destInput?.value || '';
+
+  if (searchMode === 'buy') {
+    if (dest) {
+      showToast(`🏠 Searching properties for sale in ${dest}...`);
+      navigate('/stays');
+    } else {
+      showToast('📍 Please enter a wilaya or city first');
+    }
+  } else {
     const guestsInput = document.getElementById('guestsInput');
-    const dest = destInput?.value || '';
     const guests = guestsInput?.value || '2';
     if (dest) {
       showToast(`🔍 Searching stays in ${dest} for ${guests} guests...`);
       navigate('/stays');
     } else {
-      showToast('📍 Please enter a destination first');
+      showToast('📍 Please enter a wilaya or city first');
     }
-  };
+  }
+};
 
   return (
     <>
@@ -92,12 +105,102 @@ function HomePage({ showToast }) {
         <div className="hero-content">
           <div className="hero-eyebrow">Rent or buy with ease.</div>
           <h1 className="hero-title">
-           We help you feel<br /> at  <em>Home</em>
+            
+            Find your home<br /> across <em>Algeria</em>
           </h1>
-          <p className="hero-sub">Discover apartments, houses, and villas for short stays or long-term living.
+          <p className="hero-sub"> Apartments, houses and villas for short stays or long-term living — 
+  pay easily in Algerian Dinar via Baridi Mob.
     </p>
 
-          //Search goes here 
+         {/* SEARCH BAR */}
+<div className="search-wrap">
+  <div className="search-tabs">
+    <button
+      className={`search-tab ${searchMode === 'stays' ? 'active' : ''}`}
+      onClick={() => setSearchMode('stays')}
+    >Stays</button>
+   
+    <button
+      className={`search-tab ${searchMode === 'buy' ? 'active' : ''}`}
+      onClick={() => setSearchMode('buy')}
+    >Buy</button>
+  </div>
+
+  <div className="search-bar">
+    {/* FIELD 1 — always shown */}
+    <div className="search-field search-field--wide">
+      <label className="search-label">Where</label>
+      <input
+        id="destInput"
+        className="search-input"
+        placeholder="Search destinations"
+      />
+    </div>
+
+    {searchMode === 'buy' ? (
+      <>
+        <div className="search-field">
+          <label className="search-label">Rooms</label>
+          <input
+            className="search-input"
+            type="number"
+            min="1"
+            max="20"
+            placeholder="Min rooms"
+          />
+        </div>
+        <div className="search-field search-field--narrow">
+          <label className="search-label">Max Budget</label>
+          <input
+            className="search-input"
+            type="number"
+            min="0"
+            placeholder="e.g. 12,000,000"
+          />
+        </div>
+      </>
+    ) : (
+      <>
+        <div className="search-field">
+          <label className="search-label">Check in</label>
+          <input
+            id="checkinInput"
+            className="search-input"
+            type="date"
+          />
+        </div>
+        <div className="search-field">
+          <label className="search-label">Check out</label>
+          <input
+            id="checkoutInput"
+            className="search-input"
+            type="date"
+          />
+        </div>
+        <div className="search-field search-field--narrow">
+          <label className="search-label">Guests</label>
+          <input
+            id="guestsInput"
+            className="search-input"
+            type="number"
+            min="1"
+            max="20"
+            placeholder="Add guests"
+          />
+        </div>
+      </>
+    )}
+
+    <button className="search-btn" onClick={handleSearch}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="16" height="16">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="m21 21-4.35-4.35"/>
+      </svg>
+      {searchMode === 'buy' ? 'Find Property' : 'Search'}
+    </button>
+  </div>
+</div>
+          
 
           <div className="hero-stats">
             <div className="hero-stat">
@@ -116,7 +219,7 @@ function HomePage({ showToast }) {
         </div>
         <div className="scroll-hint">
           <div className="scroll-line"></div>
-          Scroll
+      
         </div>
       </section>
 
@@ -124,30 +227,60 @@ function HomePage({ showToast }) {
       <section className="editorial-section">
         <div className="editorial-grid">
           <div className="editorial-img-wrap fade-up">
-           <img src="/photos/home.jpg" alt="Luxury Villa" className="editorial-img" />  
+           <img src="/photos/homepage.jpg" alt="Luxury Villa" className="editorial-img" />  
 
             <div className="editorial-img-overlay"></div>
-                        <div className="editorial-img-tag">"A place that feels like it was made<br />just for you."</div>
+                        <div className="editorial-img-tag"> "A home away from home,<br />anywhere in Algeria."</div>
 
           </div>
           <div className="editorial-content fade-up">
             <div className="section-eyebrow"> Mabit'i</div>
             <h2 className="section-title">More Than a Rental.<br />It's an <em>Experience</em>.</h2>
-            <p className="section-sub" style={{ color: 'rgba(255,255,255,0.5)' }}>We handpick every property, verify every host, and ensure your stay exceeds every expectation.</p>
+            <p className="section-sub" style={{ color: 'rgba(255,255,255,0.5)' }}> We connect Algerian hosts and guests directly — verified listings, 
+  local payment methods, and a community built on trust.</p>
             <div className="editorial-features">
-              <div className="editorial-feature">
-                <div className="editorial-feature-icon">🛡️</div>
-                <div className="editorial-feature-text"><h4>Protected Booking</h4><p>Every stay is covered by our $1M host guarantee and 24/7 concierge support.</p></div>
-              </div>
-              <div className="editorial-feature">
-                <div className="editorial-feature-icon">✦</div>
-                <div className="editorial-feature-text"><h4>Curated Properties Only</h4><p>We personally vet each listing. If it's here, it's genuinely extraordinary.</p></div>
-              </div>
-              <div className="editorial-feature">
-                <div className="editorial-feature-icon">💬</div>
-                <div className="editorial-feature-text"><h4>Authentic Community</h4><p>Real reviews from real guests. No paid placements, no fake stars.</p></div>
-              </div>
-            </div>
+  <div className="editorial-feature">
+    <div className="editorial-feature-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="m9 12 2 2 4-4"/>
+      </svg>
+    </div>
+    <div className="editorial-feature-text">
+      <h4>Verified Listings</h4>
+      <p>Every host is verified via national ID. Browse with confidence, book without worry.</p>
+    </div>
+  </div>
+
+  <div className="editorial-feature">
+    <div className="editorial-feature-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="3"/>
+        <path d="M2 10h20"/>
+        <path d="M6 15h4"/>
+        <path d="M14 15h4"/>
+      </svg>
+    </div>
+    <div className="editorial-feature-text">
+      <h4>Pay in Algerian Dinar</h4>
+      <p>Forget international cards. Pay easily via Baridi Mob or CCP postal transfer.</p>
+    </div>
+  </div>
+
+  <div className="editorial-feature">
+    <div className="editorial-feature-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        <path d="M8 10h8"/>
+        <path d="M8 14h5"/>
+      </svg>
+    </div>
+    <div className="editorial-feature-text">
+      <h4>Real Community Reviews</h4>
+      <p>Honest ratings from real guests across Algeria. No paid placements, no fake stars.</p>
+    </div>
+  </div>
+</div>
   <Link
   to="/about"
   style={{

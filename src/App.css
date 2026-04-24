@@ -251,10 +251,14 @@ nav.scrolled {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background-image: url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1800&q=80');
+  
+  background-image: url('https://farm6.staticflickr.com/5276/7221414696_299d4396d6_z.jpg');
+  
+
+  
   background-size: cover;
   background-position: center;
-  opacity: 0.18;
+  opacity: 0.30;
   transform: scale(1.05);
   transition: transform 20s ease;
 }
@@ -1020,10 +1024,9 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
   flex-shrink: 0;
+  color: var(--gold);
 }
-
 .editorial-feature-text h4 {
   color: var(--white);
   font-size: 15px;
@@ -1547,26 +1550,35 @@ footer {
   display: flex;
   gap: 12px;
 }
+.social-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: var(--transition);
+  color: rgba(255, 255, 255, 0.75);
+}
 
 .social-btn {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 20px;
   cursor: pointer;
   transition: var(--transition);
+  color: rgba(255, 255, 255, 0.75);
 }
-
-.social-btn:hover {
-  border-color: var(--gold);
-  background: rgba(201, 168, 76, 0.1);
-}
-
 .footer-col h5 {
   font-family: 'DM Sans', sans-serif;
   font-size: 11px;
@@ -2040,4 +2052,119 @@ footer {
   height: 60px;   /* ajuste la taille du logo */
   width: auto;    /* conserve les proportions */
   display: block; /* évite les décalages verticaux */
+}
+
+.search-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin: 36px 0 40px;
+  width: 100%;
+}
+
+.search-tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50px;
+  padding: 4px;
+}
+
+.search-tab {
+  padding: 8px 22px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.search-tab.active {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+.search-bar {
+  display: flex;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 60px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 720px;
+  backdrop-filter: blur(8px);
+}
+
+.search-field {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 14px 22px;
+  flex: 1;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.15s;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.search-field--wide  { flex: 1.5; }
+.search-field--narrow { flex: 0.8; border-right: none; }
+
+.search-field:hover { background: rgba(255, 255, 255, 0.05); }
+
+.search-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 3px;
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 13px;
+  font-family: inherit;
+  width: 100%;
+  padding: 0;
+  color-scheme: dark;
+}
+
+.search-input::placeholder { color: rgba(255, 255, 255, 0.3); }
+
+.search-btn {
+  margin: 6px;
+  background: var(--gold);
+  border: none;
+  border-radius: 50px;
+  padding: 0 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--navy);
+  white-space: nowrap;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+
+.search-btn:hover { opacity: 0.85; }
+
+@media (max-width: 600px) {
+  .search-bar { flex-direction: column; border-radius: 20px; }
+  .search-field { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .search-field--narrow { border-bottom: none; }
+  .search-btn { margin: 8px; padding: 14px; border-radius: 14px; justify-content: center; }
 }
