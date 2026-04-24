@@ -2168,3 +2168,179 @@ footer {
   .search-field--narrow { border-bottom: none; }
   .search-btn { margin: 8px; padding: 14px; border-radius: 14px; justify-content: center; }
 }
+
+/* === ADMIN DASHBOARD === */
+.admin-dashboard {
+  background: var(--cream); /* use your site palette */
+  padding: 100px 40px 40px; /* extra top padding so title clears navbar */
+  min-height: 80vh;
+}
+
+/* Header */
+.admin-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.admin-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: var(--navy);
+  margin-bottom: 10px;
+}
+
+.admin-sub {
+  font-size: 14px;
+  color: var(--gray-3);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Tabs */
+.admin-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.admin-tab {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  padding: 10px 20px;
+  margin: 0 5px;
+  background: var(--cream);
+  border: 1px solid var(--gray-3);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.admin-tab.active {
+  background: var(--gold);
+  color: var(--white);
+  font-weight: 600;}
+
+/* Content wrapper */
+.admin-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Stats cards */
+.admin-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.stat-card {
+  background: var(--gray-1);
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  flex: 1;
+  margin: 0 10px;
+}
+
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--gray-3);
+  margin-top: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Users table */
+.admin-users {
+  margin-top: 40px;
+}
+
+.admin-users h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 15px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: center;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.admin-table th {
+  background: var(--cream);
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.admin-table button {
+  padding: 6px 12px;
+  background: #e74c3c; /* red for ban */
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.admin-table button:hover {
+  background: #c0392b;
+}
+
+/* Complaints */
+.admin-complaints {
+  margin-top: 40px;
+  background: var(--white);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-complaints h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 15px;
+}
+
+.admin-complaints li {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-mid);
+}
+
+.admin-complaints button {
+  padding: 6px 12px;
+  background: #27ae60; /* green for resolve */
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.admin-complaints button:hover {
+  background: #1e8449;
+}

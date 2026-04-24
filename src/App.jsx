@@ -17,6 +17,8 @@ import HostLoginPage from './pages/HostLoginPage';
 import HostSetupPage from './pages/HostSetupPage'
 import PropertyDetailPage from './pages/PropertyDetailPage';
 import AboutPage from './pages/AboutPage';
+import AdminDashboard from './pages/AdminDashboard';
+
 
 import { listingsData } from './data/data';
 
@@ -124,6 +126,8 @@ function AppInner() {
         <Route path="/host/setup" element={<HostSetupPage showToast={showToast} />} />
         <Route path="/property/:id" element={<PropertyDetailPage showToast={showToast} onOpenBooking={openBooking} />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/adminDashboard" element={<AdminDashboard showToast={showToast} />} />
+
       </Routes>
 
       <Footer showToast={showToast} />
