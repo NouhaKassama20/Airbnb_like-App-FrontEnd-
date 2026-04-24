@@ -2384,3 +2384,98 @@ footer {
   color: var(--text-mid);
   line-height: 1.6;
 }
+
+/* Host Verification */
+.admin-verification {
+  margin-top: 40px;
+  background: var(--white);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-verification h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 15px;
+}
+
+.admin-verification .approve-btn {
+  padding: 6px 12px;
+  background: #27ae60; /* green for approve */
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.admin-verification .approve-btn:hover {
+  background: #1e8449;
+}
+
+.admin-verification .reject-btn {
+  padding: 6px 12px;
+  background: #e74c3c; /* red for reject */
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.admin-verification .reject-btn:hover {
+  background: #c0392b;
+}
+
+/* Transactions */
+.admin-transactions {
+  margin-top: 40px;
+  background: var(--white);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-transactions h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 15px;
+}
+
+.admin-transactions td {
+  font-size: 14px;
+  color: var(--text-mid);
+}
+
+/* Audit Logs */
+.admin-logs {
+  margin-top: 40px;
+  background: var(--white);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.admin-logs h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin-bottom: 15px;
+}
+
+.admin-logs ul {
+  list-style: none;
+  padding: 0;
+}
+
+.admin-logs li {
+  margin-bottom: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-mid);
+  border-bottom: 1px solid #eee;
+  padding-bottom: 6px;
+}
