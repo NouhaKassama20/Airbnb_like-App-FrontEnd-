@@ -1,53 +1,244 @@
 // src/data/data.js
-
 export const listingsData = [
-  { id: 1, name: 'Villa Serenita', location: 'Positano, Italy', price: 480, rating: 4.97, reviews: 218, img: 'https://plus.unsplash.com/premium_photo-1663126298656-33616be83c32?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', tags: ['Pool', 'Sea View', 'Chef'], badge: 'New', category: 'villa' },
-  { id: 1, name: 'Villa Serenita', location: 'Positano, Italy', price: 480, rating: 4.97, reviews: 218, img: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGxpdmluZyUyMHJvb20lMjBpbnRlcmlvciUyMGRlc2lnbnxlbnwwfHwwfHx8MA%3D%3D', tags: ['Pool', 'Sea View', 'Chef'], badge: 'New', category: 'villa' },
-  { id: 1, name: 'Villa Serenita', location: 'Positano, Italy', price: 480, rating: 4.97, reviews: 218, img: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGxpdmluZyUyMHJvb20lMjBpbnRlcmlvciUyMGRlc2lnbnxlbnwwfHwwfHx8MA%3D%3D', tags: ['Pool', 'Sea View', 'Chef'], badge: 'New', category: 'villa' },
-  { id: 1, name: 'Villa Serenita', location: 'Positano, Italy', price: 480, rating: 4.97, reviews: 218, img: 'https://media.istockphoto.com/id/2187851521/fr/photo/design-de-salon-moderne-avec-salle-%C3%A0-manger-ouverte-g%C3%A9n%C3%A9r%C3%A9-num%C3%A9riquement.webp?a=1&b=1&s=612x612&w=0&k=20&c=kjtOdtai2e-Is6ps5b9l-ZI5Z12VLktKF70HEHtftfQ=', tags: ['Pool', 'Sea View', 'Chef'], badge: 'New', category: 'villa' },
-  { id: 1, name: 'Villa Serenita', location: 'Positano, Italy', price: 480, rating: 4.97, reviews: 218, img: 'https://media.istockphoto.com/id/1357529194/fr/photo/rendu-3d-dun-salon-de-style-moderne-avec-chemin%C3%A9e.webp?a=1&b=1&s=612x612&w=0&k=20&c=n4q2CKwc5RQyGg10PCYuA2GrsoYr9meHteBfyStO3as=', tags: ['Pool', 'Sea View', 'Chef'], badge: 'New', category: 'villa' },
-  { id: 1, name: 'Villa Serenita', location: 'Positano, Italy', price: 480, rating: 4.97, reviews: 218, img: 'https://images.unsplash.com/photo-1611048267451-e6ed903d4a38?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8bGl2aW5nJTIwcm9vbSUyMGludGVyaW9yJTIwZGVzaWdufGVufDB8fDB8fHww', tags: ['Pool', 'Sea View', 'Chef'], badge: 'New', category: 'villa' },
-  { id: 1, name: 'Villa Serenita', location: 'Positano, Italy', price: 480, rating: 4.97, reviews: 218, img: 'https://plus.unsplash.com/premium_photo-1663126298656-33616be83c32?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', tags: ['Pool', 'Sea View', 'Chef'], badge: 'New', category: 'villa' },
+  // Algiers
+  {
+    id: 1,
+    name: 'Modern Apartment in Algiers',
+    location: 'Algiers, Algeria',
+    price: 7500,
+    rating: 4.8,
+    reviews: 54,
+    img: 'https://images.unsplash.com/photo-1600585154340-1e4b3b1d1d9a',
+    tags: ['Wi-Fi', 'Furnished', 'Near Metro'],
+    badge: 'New',
+    category: 'apartment'
+  },
+  {
+    id: 2,
+    name: 'Luxury Penthouse in Algiers',
+    location: 'Algiers, Algeria',
+    price: 20000,
+    rating: 4.95,
+    reviews: 12,
+    img: 'https://images.unsplash.com/photo-1617098709804-705581f844eb',
+    tags: ['Sea View', 'Terrace', 'Modern'],
+    badge: 'Premium',
+    category: 'apartment'
+  },
+  {
+    id: 3,
+    name: 'Family House in Hydra',
+    location: 'Algiers, Algeria',
+    price: 9500,
+    rating: 4.7,
+    reviews: 38,
+    img: 'https://images.unsplash.com/photo-1635108201275-f2858f087bd9',
+    tags: ['Garden', 'Garage', 'Quiet'],
+    badge: null,
+    category: 'house'
+  },
+  {
+    id: 4,
+    name: 'Traditional House in El Harrach',
+    location: 'Algiers, Algeria',
+    price: 7200,
+    rating: 4.5,
+    reviews: 26,
+    img: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461',
+    tags: ['Courtyard', 'Family', 'Affordable'],
+    badge: null,
+    category: 'house'
+  },
 
+  // Oran
+  {
+    id: 5,
+    name: 'Seaside Villa in Oran',
+    location: 'Oran, Algeria',
+    price: 12000,
+    rating: 4.9,
+    reviews: 87,
+    img: 'https://images.unsplash.com/photo-1600585154340-1e4b3b1d1d9a',
+    tags: ['Sea View', 'Pool', 'Family'],
+    badge: 'Top Rated',
+    category: 'villa'
+  },
+  {
+    id: 6,
+    name: 'Apartment near Oran Port',
+    location: 'Oran, Algeria',
+    price: 6500,
+    rating: 4.6,
+    reviews: 33,
+    img: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39',
+    tags: ['Central', 'Balcony', 'Parking'],
+    badge: null,
+    category: 'apartment'
+  },
+  {
+    id: 7,
+    name: 'Traditional House in Oran Suburbs',
+    location: 'Oran, Algeria',
+    price: 7000,
+    rating: 4.7,
+    reviews: 29,
+    img: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461',
+    tags: ['Courtyard', 'Family', 'Quiet'],
+    badge: null,
+    category: 'house'
+  },
+  {
+    id: 8,
+    name: 'Family House near Ain El Turk',
+    location: 'Oran, Algeria',
+    price: 8800,
+    rating: 4.8,
+    reviews: 34,
+    img: 'https://images.unsplash.com/photo-1635108201418-0996823f4cc3',
+    tags: ['Sea View', 'Garden', 'Garage'],
+    badge: null,
+    category: 'house'
+  },
 
+  // Constantine
+  {
+    id: 9,
+    name: 'Student Studio in Constantine',
+    location: 'Constantine, Algeria',
+    price: 3500,
+    rating: 4.6,
+    reviews: 32,
+    img: 'https://images.unsplash.com/photo-1617103908936-1a1b1b1b1b1b',
+    tags: ['Close to University', 'Furnished', 'Budget'],
+    badge: null,
+    category: 'student'
+  },
+  {
+    id: 10,
+    name: 'Apartment near Suspension Bridge',
+    location: 'Constantine, Algeria',
+    price: 5500,
+    rating: 4.5,
+    reviews: 21,
+    img: 'https://images.unsplash.com/photo-1608198399988-341f712c3711',
+    tags: ['Historic View', 'Balcony', 'Wi-Fi'],
+    badge: 'New',
+    category: 'apartment'
+  },
+  {
+    id: 11,
+    name: 'Family House in Constantine',
+    location: 'Constantine, Algeria',
+    price: 6000,
+    rating: 4.7,
+    reviews: 27,
+    img: 'https://images.unsplash.com/photo-1635108201275-f2858f087bd9',
+    tags: ['Courtyard', 'Family', 'Quiet'],
+    badge: null,
+    category: 'house'
+  },
+  {
+    id: 12,
+    name: 'House near Constantine Old Town',
+    location: 'Constantine, Algeria',
+    price: 6400,
+    rating: 4.6,
+    reviews: 19,
+    img: 'https://images.unsplash.com/photo-1675409145919-277c0fc2aa7d',
+    tags: ['Historic', 'Family', 'Garage'],
+    badge: null,
+    category: 'house'
+  },
 
-  { id: 2, name: 'Kyoto Garden House', location: 'Kyoto, Japan', price: 220, rating: 4.94, reviews: 341, img: 'https://plus.unsplash.com/premium_photo-1671269705771-1ae9b3162118?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fGNoYW1icmVzfGVufDB8fDB8fHww', tags: ['Garden', 'Zen', 'Tea Room'], badge: null, category: 'city' },
-  { id: 2, name: 'Kyoto Garden House', location: 'Kyoto, Japan', price: 220, rating: 4.94, reviews: 341, img: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2hhbWJyZXMlMjBkJUUyJTgwJTk5aCVDMyVCNHRlbHxlbnwwfHwwfHx8MA%3D%3D', tags: ['Garden', 'Zen', 'Tea Room'], badge: null, category: 'city' },
-  { id: 2, name: 'Kyoto Garden House', location: 'Kyoto, Japan', price: 220, rating: 4.94, reviews: 341, img: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGNoYW1icmVzJTIwZCVFMiU4MCU5OWglQzMlQjR0ZWx8ZW58MHx8MHx8fDA%3D', tags: ['Garden', 'Zen', 'Tea Room'], badge: null, category: 'city' },
-  { id: 2, name: 'Kyoto Garden House', location: 'Kyoto, Japan', price: 220, rating: 4.94, reviews: 341, img: 'https://images.unsplash.com/photo-1608198399988-341f712c3711?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGNoYW1icmVzJTIwZCVFMiU4MCU5OWglQzMlQjR0ZWx8ZW58MHx8MHx8fDA%3D', tags: ['Garden', 'Zen', 'Tea Room'], badge: null, category: 'city' },
-  { id: 2, name: 'Kyoto Garden House', location: 'Kyoto, Japan', price: 220, rating: 4.94, reviews: 341, img: 'https://images.unsplash.com/photo-1507038772120-7fff76f79d79?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGNoYW1icmVzJTIwZCVFMiU4MCU5OWglQzMlQjR0ZWx8ZW58MHx8MHx8fDA%3D', tags: ['Garden', 'Zen', 'Tea Room'], badge: null, category: 'city' },
-  { id: 2, name: 'Kyoto Garden House', location: 'Kyoto, Japan', price: 220, rating: 4.94, reviews: 341, img: 'https://images.unsplash.com/photo-1675409145919-277c0fc2aa7d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGNoYW1icmVzJTIwZCVFMiU4MCU5OWglQzMlQjR0ZWx8ZW58MHx8MHx8fDA%3D', tags: ['Garden', 'Zen', 'Tea Room'], badge: null, category: 'city' },
-  { id: 2, name: 'Kyoto Garden House', location: 'Kyoto, Japan', price: 220, rating: 4.94, reviews: 341, img: 'https://picsum.photos/id/96/600/450', tags: ['Garden', 'Zen', 'Tea Room'], badge: null, category: 'city' },
+  // Tlemcen
+  {
+    id: 13,
+    name: 'Traditional House in Tlemcen',
+    location: 'Tlemcen, Algeria',
+    price: 5000,
+    rating: 4.7,
+    reviews: 41,
+    img: 'https://images.unsplash.com/photo-1617103908936-1a1b1b1b1b1b',
+    tags: ['Historic', 'Courtyard', 'Quiet'],
+    badge: null,
+    category: 'house'
+  },
+  {
+    id: 14,
+    name: 'Apartment near Tlemcen University',
+    location: 'Tlemcen, Algeria',
+    price: 4800,
+    rating: 4.4,
+    reviews: 18,
+    img: 'https://images.unsplash.com/photo-1617806118233-18e1de247200',
+    tags: ['Close to Campus', 'Furnished', 'Budget'],
+    badge: null,
+    category: 'student'
+  },
+  {
+    id: 15,
+    name: 'Villa with Garden in Tlemcen',
+    location: 'Tlemcen, Algeria',
+    price: 9500,
+    rating: 4.85,
+    reviews: 36,
+    img: 'https://images.unsplash.com/photo-1675409145919-277c0fc2aa7d',
+    tags: ['Garden', 'Family', 'Spacious'],
+    badge: 'Top Rated',
+    category: 'villa'
+  },
+  {
+    id: 16,
+    name: 'House in Mansourah District',
+    location: 'Tlemcen, Algeria',
+    price: 7200,
+    rating: 4.6,
+    reviews: 23,
+    img: 'https://images.unsplash.com/photo-1635108201418-0996823f4cc3',
+    tags: ['Courtyard', 'Family', 'Garage'],
+    badge: null,
+    category: 'house'
+  },
 
-  { id: 3, name: 'Alpine Dream Chalet', location: 'Zermatt, Switzerland', price: 650, rating: 4.99, reviews: 127, img: 'https://images.unsplash.com/photo-1706164971299-cfa23ec76083?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YmFja3lhcmQlMjBwb29sfGVufDB8fDB8fHww', tags: ['Ski-in', 'Hot Tub', 'View'], badge: 'Top Rated', category: 'mountain' },
-  { id: 3, name: 'Alpine Dream Chalet', location: 'Zermatt, Switzerland', price: 650, rating: 4.99, reviews: 127, img: 'https://images.unsplash.com/photo-1635108201275-f2858f087bd9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YmFja3lhcmQlMjBwb29sfGVufDB8fDB8fHww', tags: ['Ski-in', 'Hot Tub', 'View'], badge: 'Top Rated', category: 'mountain' },
-  { id: 3, name: 'Alpine Dream Chalet', location: 'Zermatt, Switzerland', price: 650, rating: 4.99, reviews: 127, img: 'https://plus.unsplash.com/premium_photo-1682377521625-c656fc1ff3e1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8YmFja3lhcmQlMjBwb29sfGVufDB8fDB8fHww', tags: ['Ski-in', 'Hot Tub', 'View'], badge: 'Top Rated', category: 'mountain' },
-  { id: 3, name: 'Alpine Dream Chalet', location: 'Zermatt, Switzerland', price: 650, rating: 4.99, reviews: 127, img: 'https://images.unsplash.com/photo-1635108201418-0996823f4cc3?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8YmFja3lhcmQlMjBwb29sfGVufDB8fDB8fHww', tags: ['Ski-in', 'Hot Tub', 'View'], badge: 'Top Rated', category: 'mountain' },
-  { id: 3, name: 'Alpine Dream Chalet', location: 'Zermatt, Switzerland', price: 650, rating: 4.99, reviews: 127, img: 'https://plus.unsplash.com/premium_photo-1687862745573-1e8dff585c66?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fGJhY2t5YXJkJTIwcG9vbHxlbnwwfHwwfHx8MA%3D%3D', tags: ['Ski-in', 'Hot Tub', 'View'], badge: 'Top Rated', category: 'mountain' },
-  { id: 3, name: 'Alpine Dream Chalet', location: 'Zermatt, Switzerland', price: 650, rating: 4.99, reviews: 127, img: 'https://media.istockphoto.com/id/2230286265/fr/photo/int%C3%A9rieur-moderne-espace-de-divertissement-ext%C3%A9rieur-et-patio-sous-une-pergola-pavillon-au.webp?a=1&b=1&s=612x612&w=0&k=20&c=wukYYKWt1qRybCpzHDzDDZ050sDuE6gMZmxNmZBurGY=', tags: ['Ski-in', 'Hot Tub', 'View'], badge: 'Top Rated', category: 'mountain' },
-  
-  
-  { id: 4, name: 'Bali Jungle Retreat', location: 'Ubud, Bali', price: 180, rating: 4.91, reviews: 489, img: 'https://plus.unsplash.com/premium_photo-1671269942393-ab3372a09ce9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Jungle', 'Pool', 'Yoga'], badge: null, category: 'villa' },
-  { id: 4, name: 'Bali Jungle Retreat', location: 'Ubud, Bali', price: 180, rating: 4.91, reviews: 489, img: 'https://plus.unsplash.com/premium_photo-1671269942393-ab3372a09ce9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Jungle', 'Pool', 'Yoga'], badge: null, category: 'villa' },
-  { id: 4, name: 'Bali Jungle Retreat', location: 'Ubud, Bali', price: 180, rating: 4.91, reviews: 489, img: 'https://plus.unsplash.com/premium_photo-1671269942393-ab3372a09ce9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Jungle', 'Pool', 'Yoga'], badge: null, category: 'villa' },
-  { id: 4, name: 'Bali Jungle Retreat', location: 'Ubud, Bali', price: 180, rating: 4.91, reviews: 489, img: 'https://plus.unsplash.com/premium_photo-1671269942393-ab3372a09ce9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Jungle', 'Pool', 'Yoga'], badge: null, category: 'villa' },
-  { id: 4, name: 'Bali Jungle Retreat', location: 'Ubud, Bali', price: 180, rating: 4.91, reviews: 489, img: 'https://plus.unsplash.com/premium_photo-1671269942393-ab3372a09ce9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Jungle', 'Pool', 'Yoga'], badge: null, category: 'villa' },
-  { id: 4, name: 'Bali Jungle Retreat', location: 'Ubud, Bali', price: 180, rating: 4.91, reviews: 489, img: 'https://plus.unsplash.com/premium_photo-1671269942393-ab3372a09ce9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Jungle', 'Pool', 'Yoga'], badge: null, category: 'villa' },
-
-
-  { id: 5, name: 'Santorini Cliffside', location: 'Oia, Greece', price: 520, rating: 4.98, reviews: 163, img: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Infinity Pool', 'Cave Suite'], badge: 'New', category: 'villa' },
-  { id: 5, name: 'Santorini Cliffside', location: 'Oia, Greece', price: 520, rating: 4.98, reviews: 163, img: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Infinity Pool', 'Cave Suite'], badge: 'New', category: 'villa' },
-  { id: 5, name: 'Santorini Cliffside', location: 'Oia, Greece', price: 520, rating: 4.98, reviews: 163, img: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Infinity Pool', 'Cave Suite'], badge: 'New', category: 'villa' },
-  { id: 5, name: 'Santorini Cliffside', location: 'Oia, Greece', price: 520, rating: 4.98, reviews: 163, img: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Infinity Pool', 'Cave Suite'], badge: 'New', category: 'villa' },
-  { id: 5, name: 'Santorini Cliffside', location: 'Oia, Greece', price: 520, rating: 4.98, reviews: 163, img: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Infinity Pool', 'Cave Suite'], badge: 'New', category: 'villa' },
-  { id: 5, name: 'Santorini Cliffside', location: 'Oia, Greece', price: 520, rating: 4.98, reviews: 163, img: 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Infinity Pool', 'Cave Suite'], badge: 'New', category: 'villa' },
-
-
-  { id: 6, name: 'Brooklyn Loft Living', location: 'New York, USA', price: 195, rating: 4.88, reviews: 702, img: 'https://images.unsplash.com/photo-1617098709804-705581f844eb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Terrace', 'Artistic', 'Central'], badge: null, category: 'city' },
-  { id: 7, name: 'Coastal Pine Cabin', location: 'Oregon, USA', price: 145, rating: 4.93, reviews: 287, img: 'https://images.unsplash.com/photo-1505409628601-edc9af17fda6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Beach', 'Fireplace', 'Remote'], badge: null, category: 'cabin' },
-  { id: 8, name: 'Paris Haussmann Flat', location: 'Le Marais, Paris', price: 275, rating: 4.95, reviews: 412, img: 'https://plus.unsplash.com/premium_photo-1670076513880-f58e3c377903?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8c2FsbGUlMjAlQzMlQTAlMjBtYW5nZXJ8ZW58MHx8MHx8fDA%3D', tags: ['Balcony', 'Historic', 'Central'], badge: 'Top Rated', category: 'city' },
-
+  // Sétif
+  {
+    id: 17,
+    name: 'Family Apartment in Sétif',
+    location: 'Sétif, Algeria',
+    price: 6000,
+    rating: 4.5,
+    reviews: 28,
+    img: 'https://images.unsplash.com/photo-1617806118233-18e1de247200',
+    tags: ['3 Bedrooms', 'Balcony', 'Parking'],
+    badge: null,
+    category: 'apartment'
+  },
+  {
+    id: 18,
+    name: 'Budget Room in Sétif',
+    location: 'Sétif, Algeria',
+    price: 2500,
+    rating: 4.2,
+    reviews: 17,
+    img: 'https://images.unsplash.com/photo-1608198399988-341f712c3711',
+    tags: ['Single Room', 'Wi-Fi', 'Affordable'],
+    badge: null,
+    category: 'student'
+  },
+  {
+    id: 19,
+    name: 'House with Garden in Sétif',
+    location: 'Sétif, Algeria',
+    price: 7500,
+    rating: 4.6,
+    reviews: 24,
+    img: 'https://images.unsplash.com/photo-1635108201418-0996823f4cc3',
+    tags: ['Garden', 'Family', 'Garage'],
+    badge: null,
+    category: 'house'
+  },
 ];
+
 
 export const experiencesData = [
   { title: 'Truffle Hunt & Feast', host: 'Hosted by Marco', price: 95, rating: 4.98, reviews: 203, duration: '4 hours', img: 'https://picsum.photos/id/124/400/400' },

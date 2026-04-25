@@ -1,17 +1,112 @@
 // src/pages/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
+import {
+  ResponsiveContainer,
+  BarChart, Bar,
+  LineChart, Line,
+  PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, Legend, CartesianGrid
+} from 'recharts';
 
+// ── Chart Data ───────────────────────────────────────────────
+const bookingsPerMonth = [
+  { month: 'Jan', bookings: 18 },
+  { month: 'Feb', bookings: 27 },
+  { month: 'Mar', bookings: 35 },
+  { month: 'Apr', bookings: 42 },
+  { month: 'May', bookings: 61 },
+  { month: 'Jun', bookings: 74 },
+  { month: 'Jul', bookings: 95 },
+  { month: 'Aug', bookings: 88 },
+  { month: 'Sep', bookings: 52 },
+  { month: 'Oct', bookings: 39 },
+  { month: 'Nov', bookings: 28 },
+  { month: 'Dec', bookings: 21 },
+];
+
+const revenuePerMonth = [
+  { month: 'Jan', revenue: 84000 },
+  { month: 'Feb', revenue: 120000 },
+  { month: 'Mar', revenue: 158000 },
+  { month: 'Apr', revenue: 193000 },
+  { month: 'May', revenue: 271000 },
+  { month: 'Jun', revenue: 340000 },
+  { month: 'Jul', revenue: 428000 },
+  { month: 'Aug', revenue: 395000 },
+  { month: 'Sep', revenue: 234000 },
+  { month: 'Oct', revenue: 175000 },
+  { month: 'Nov', revenue: 126000 },
+  { month: 'Dec', revenue: 98000 },
+];
+
+const listingsByWilaya = [
+  { wilaya: 'Alger',       listings: 38 },
+  { wilaya: 'Oran',        listings: 24 },
+  { wilaya: 'Annaba',      listings: 18 },
+  { wilaya: 'Tlemcen',     listings: 14 },
+  { wilaya: 'Béjaïa',      listings: 12 },
+  { wilaya: 'Tamanrasset', listings: 8  },
+  { wilaya: 'Sétif',       listings: 6  },
+];
+
+const bookingStatusData = [
+  { name: 'Confirmed', value: 68 },
+  { name: 'Pending',   value: 18 },
+  { name: 'Cancelled', value: 14 },
+];
+
+const propertyTypeData = [
+  { name: 'Apartment', value: 52 },
+  { name: 'Villa',     value: 28 },
+  { name: 'House',     value: 20 },
+];
+
+const STATUS_COLORS = ['#c9a84c', '#1e3356', '#8a8070'];
+const TYPE_COLORS   = ['#c9a84c', '#13213a', '#d4cfc4'];
+
+const tooltipStyle = {
+  backgroundColor: '#13213a',
+  border: '1px solid rgba(201,168,76,0.3)',
+  borderRadius: '10px',
+  color: '#fff',
+  fontSize: '13px',
+};
+
+// ── Reusable chart card ──────────────────────────────────────
+function ChartCard({ title, children }) {
+  return (
+    <div style={{
+      background: '#13213a',
+      border: '1px solid rgba(255,255,255,0.07)',
+      borderRadius: '16px',
+      padding: '24px',
+    }}>
+      <div style={{
+        fontSize: '11px',
+        fontWeight: 600,
+        letterSpacing: '0.12em',
+        textTransform: 'uppercase',
+        color: '#c9a84c',
+        marginBottom: '20px',
+      }}>
+        {title}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────
 function AdminDashboard({ showToast }) {
   const [stats, setStats] = useState({ houses: 0, clients: 0, complaints: 0 });
   const [activeTab, setActiveTab] = useState('stats');
 
-  // Simulated counters
   useEffect(() => {
     const targets = { houses: 120, clients: 450, complaints: 12 };
     const steps = {
-      houses: targets.houses / 60,
-      clients: targets.clients / 60,
-      complaints: targets.complaints / 60
+      houses:     targets.houses / 60,
+      clients:    targets.clients / 60,
+      complaints: targets.complaints / 60,
     };
     let current = { houses: 0, clients: 0, complaints: 0 };
     const interval = setInterval(() => {
@@ -23,31 +118,19 @@ function AdminDashboard({ showToast }) {
         }
       }
       setStats({
-        houses: Math.floor(current.houses),
-        clients: Math.floor(current.clients),
-        complaints: Math.floor(current.complaints)
+        houses:     Math.floor(current.houses),
+        clients:    Math.floor(current.clients),
+        complaints: Math.floor(current.complaints),
       });
       if (allDone) clearInterval(interval);
     }, 25);
     return () => clearInterval(interval);
   }, []);
 
-  // Example actions
-  const handleBanUser = (type, id) => {
-    showToast(`🚫 Banned ${type} with ID ${id}`);
-  };
-
-  const handleResolveComplaint = (id) => {
-    showToast(`✅ Complaint ${id} resolved`);
-  };
-
-  const handleApproveHost = (id) => {
-    showToast(`✅ Host ${id} approved`);
-  };
-
-  const handleRejectHost = (id) => {
-    showToast(`❌ Host ${id} rejected`);
-  };
+  const handleBanUser          = (type, id) => showToast(`🚫 Banned ${type} with ID ${id}`);
+  const handleResolveComplaint = (id)       => showToast(`✅ Complaint ${id} resolved`);
+  const handleApproveHost      = (id)       => showToast(`✅ Host ${id} approved`);
+  const handleRejectHost       = (id)       => showToast(`❌ Host ${id} rejected`);
 
   return (
     <section className="admin-dashboard">
@@ -58,33 +141,193 @@ function AdminDashboard({ showToast }) {
 
       {/* Tabs */}
       <div className="admin-tabs">
-        <button className={`admin-tab ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>Statistics</button>
-        <button className={`admin-tab ${activeTab === 'users' ? 'active' : ''}`} onClick={() => setActiveTab('users')}>Users</button>
-        <button className={`admin-tab ${activeTab === 'verification' ? 'active' : ''}`} onClick={() => setActiveTab('verification')}>Host Verification</button>
-        <button className={`admin-tab ${activeTab === 'complaints' ? 'active' : ''}`} onClick={() => setActiveTab('complaints')}>Complaints</button>
-        <button className={`admin-tab ${activeTab === 'transactions' ? 'active' : ''}`} onClick={() => setActiveTab('transactions')}>Transactions</button>
-        <button className={`admin-tab ${activeTab === 'logs' ? 'active' : ''}`} onClick={() => setActiveTab('logs')}>Audit Logs</button>
+        {[
+          ['stats',        'Statistics'],
+          ['users',        'Users'],
+          ['verification', 'Host Verification'],
+          ['complaints',   'Complaints'],
+          ['transactions', 'Transactions'],
+          ['logs',         'Audit Logs'],
+        ].map(([key, label]) => (
+          <button
+            key={key}
+            className={`admin-tab ${activeTab === key ? 'active' : ''}`}
+            onClick={() => setActiveTab(key)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Content */}
       <div className="admin-content">
+
+        {/* ── STATISTICS ── */}
         {activeTab === 'stats' && (
-          <div className="admin-stats">
-            <div className="stat-card">
-              <div className="stat-num">{stats.houses}</div>
-              <div className="stat-label">Houses Rented</div>
+          <div>
+
+            {/* Stat Cards */}
+            <div className="admin-stats">
+              <div className="stat-card">
+                <div className="stat-num">{stats.houses}</div>
+                <div className="stat-label">Houses Rented</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-num">{stats.clients}</div>
+                <div className="stat-label">Clients Registered</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-num">{stats.complaints}</div>
+                <div className="stat-label">Complaints</div>
+              </div>
             </div>
-            <div className="stat-card">
-              <div className="stat-num">{stats.clients}</div>
-              <div className="stat-label">Clients Registered</div>
+
+            {/* Row 1 — Line chart + Bar chart */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '36px' }}>
+
+              <ChartCard title="Bookings per Month">
+                <ResponsiveContainer width="100%" height={240}>
+                  <LineChart data={bookingsPerMonth}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Line
+                      type="monotone"
+                      dataKey="bookings"
+                      stroke="#c9a84c"
+                      strokeWidth={2.5}
+                      dot={{ fill: '#c9a84c', r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Revenue per Month (DZD)">
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={revenuePerMonth} barSize={18}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
+                    />
+                    <Tooltip
+                      contentStyle={tooltipStyle}
+                      formatter={v => [`${v.toLocaleString()} DZD`, 'Revenue']}
+                    />
+                    <Bar dataKey="revenue" fill="#c9a84c" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
             </div>
-            <div className="stat-card">
-              <div className="stat-num">{stats.complaints}</div>
-              <div className="stat-label">Complaints</div>
+
+            {/* Row 2 — Horizontal bar + 2 Donuts */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px', marginTop: '24px' }}>
+
+              <ChartCard title="Listings by Wilaya">
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={listingsByWilaya} layout="vertical" barSize={12}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
+                    <XAxis
+                      type="number"
+                      tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      dataKey="wilaya"
+                      type="category"
+                      tick={{ fill: 'rgba(255,255,255,0.55)', fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      width={85}
+                    />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Bar dataKey="listings" fill="#c9a84c" radius={[0, 6, 6, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Booking Status">
+                <ResponsiveContainer width="100%" height={240}>
+                  <PieChart>
+                    <Pie
+                      data={bookingStatusData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="45%"
+                      outerRadius={75}
+                      innerRadius={38}
+                    >
+                      {bookingStatusData.map((_, i) => (
+                        <Cell key={i} fill={STATUS_COLORS[i % STATUS_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Legend
+                      iconType="circle"
+                      iconSize={8}
+                      formatter={v => (
+                        <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 12 }}>{v}</span>
+                      )}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
+              <ChartCard title="Property Types">
+                <ResponsiveContainer width="100%" height={240}>
+                  <PieChart>
+                    <Pie
+                      data={propertyTypeData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="45%"
+                      outerRadius={75}
+                      innerRadius={38}
+                    >
+                      {propertyTypeData.map((_, i) => (
+                        <Cell key={i} fill={TYPE_COLORS[i % TYPE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Legend
+                      iconType="circle"
+                      iconSize={8}
+                      formatter={v => (
+                        <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 12 }}>{v}</span>
+                      )}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ChartCard>
+
             </div>
           </div>
         )}
 
+        {/* ── USERS ── */}
         {activeTab === 'users' && (
           <div className="admin-users">
             <h2>Manage Users</h2>
@@ -106,6 +349,7 @@ function AdminDashboard({ showToast }) {
           </div>
         )}
 
+        {/* ── HOST VERIFICATION ── */}
         {activeTab === 'verification' && (
           <div className="admin-verification">
             <h2>Host Verification</h2>
@@ -118,7 +362,7 @@ function AdminDashboard({ showToast }) {
                   <td>3</td><td>Yasmine</td><td>CNIE.pdf</td><td>Pending</td>
                   <td>
                     <button className="approve-btn" onClick={() => handleApproveHost(3)}>Approve</button>
-                    <button className="reject-btn" onClick={() => handleRejectHost(3)}>Reject</button>
+                    <button className="reject-btn"  onClick={() => handleRejectHost(3)}>Reject</button>
                   </td>
                 </tr>
               </tbody>
@@ -126,6 +370,7 @@ function AdminDashboard({ showToast }) {
           </div>
         )}
 
+        {/* ── COMPLAINTS ── */}
         {activeTab === 'complaints' && (
           <div className="admin-complaints">
             <h2>Complaints</h2>
@@ -142,6 +387,7 @@ function AdminDashboard({ showToast }) {
           </div>
         )}
 
+        {/* ── TRANSACTIONS ── */}
         {activeTab === 'transactions' && (
           <div className="admin-transactions">
             <h2>Transactions</h2>
@@ -151,16 +397,17 @@ function AdminDashboard({ showToast }) {
               </thead>
               <tbody>
                 <tr>
-                  <td>201</td><td>Ali</td><td>5000 DZD</td><td>Baridi Mob</td><td>Completed</td>
+                  <td>201</td><td>Ali</td><td>5 000 DZD</td><td>Baridi Mob</td><td>Completed</td>
                 </tr>
                 <tr>
-                  <td>202</td><td>Sara</td><td>3500 DZD</td><td>CCP</td><td>Pending</td>
+                  <td>202</td><td>Sara</td><td>3 500 DZD</td><td>CCP</td><td>Pending</td>
                 </tr>
               </tbody>
             </table>
           </div>
         )}
 
+        {/* ── AUDIT LOGS ── */}
         {activeTab === 'logs' && (
           <div className="admin-logs">
             <h2>Audit Logs</h2>
@@ -171,6 +418,7 @@ function AdminDashboard({ showToast }) {
             </ul>
           </div>
         )}
+
       </div>
     </section>
   );
