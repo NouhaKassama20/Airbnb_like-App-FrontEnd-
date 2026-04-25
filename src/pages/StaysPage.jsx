@@ -139,7 +139,7 @@ function StaysPage({ showToast, onOpenBooking }) {
                     <div style={{ fontSize: 13, whiteSpace: 'nowrap' }}>★ {l.rating}</div>
                   </div>
                   <div style={{ fontSize: 13, color: '#717171', marginTop: 2 }}>
-                    <b style={{ color: '#222', fontWeight: 500 }}>${l.price * 2}</b> pour 2 nuits
+                    <b style={{ color: '#222', fontWeight: 500 }}>{l.price * 2}DA</b> pour 2 nuits
                   </div>
                 </div>
               </div>

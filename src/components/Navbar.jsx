@@ -13,7 +13,7 @@ function Navbar({ scrolled, onOpenModal }) {
         Mabiti'<span>i</span>
       </Link>
       <ul className="nav-links">
-        <li><Link to="/stays" className={location.pathname === '/stays' ? 'active-link' : ''}>Stays</Link></li>
+        <li><Link to="/stays" className={location.pathname === '/Booking' ? 'active-link' : ''}>Booking</Link></li>
         <li><Link to="/destinations" className={location.pathname === '/destinations' ? 'active-link' : ''}>Destinations</Link></li>
         <li><Link to="/experiences" className={location.pathname === '/experiences' ? 'active-link' : ''}>Experiences</Link></li>
         <li><Link to="/host" className={location.pathname === '/host' ? 'active-link' : ''}>Host</Link></li>
