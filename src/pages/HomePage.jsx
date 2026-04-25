@@ -375,7 +375,7 @@ function HomePage({ showToast }) {
       <section className="testimonials-section">
         <div className="section-header" style={{ textAlign: 'center', marginBottom: '60px' }}>
           <div className="section-eyebrow" style={{ justifyContent: 'center', color: 'var(--gold)' }}>Guest Stories</div>
-          <h2 className="section-title" style={{ color: 'var(--white)', textAlign: 'center' }}>Voices of Our <em>Community</em></h2>
+          <h2 className="section-title" style={{ color: 'var(--white)', textAlign: 'center' }}>Voices of Our <em>Users</em></h2>
         </div>
         <div className="testimonials-track-wrap">
           <div className="testimonials-track">
