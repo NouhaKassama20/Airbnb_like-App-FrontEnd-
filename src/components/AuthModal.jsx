@@ -12,7 +12,7 @@ function AuthModal({ open, onClose, onAuth }) {
     <div className={`modal-overlay ${open ? 'open' : ''}`} onClick={closeOnBg}>
       <div className="modal">
         <div className="modal-header">
-          <div className="modal-title">Welcome to NestAway</div>
+          <div className="modal-title">Welcome to <em>Mabiti'i </em></div>
           <button className="modal-close" onClick={onClose}>×</button>
         </div>
         <div className="modal-body">
@@ -27,8 +27,9 @@ function AuthModal({ open, onClose, onAuth }) {
             <div className="form-divider"><span>or continue with</span></div>
             <div className="social-login">
               <button className="social-login-btn" onClick={onAuth}>🌐 Google</button>
-              <button className="social-login-btn" onClick={onAuth}>🍎 Apple</button>
               <button className="social-login-btn" onClick={onAuth}>📘 Facebook</button>
+              <button className="social-login-btn" onClick={onAuth}>📨 Telegram </button>
+
             </div>
           </div>
         </div>
