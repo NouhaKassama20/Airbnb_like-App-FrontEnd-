@@ -32,23 +32,18 @@ function HostDashboard({ showToast }) {
   }, []);
 
   const fetchProperties = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/host/properties', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setProperties(data);
-      }
-    } catch (err) {
-      console.error('Error fetching properties:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const host = JSON.parse(localStorage.getItem('host_user'));
+    if (!host) return;
+    const response = await fetch(`http://localhost:5000/api/host/properties?host_id=${host.host_id}`);
+    const data = await response.json();
+    if (response.ok) setProperties(data);
+  } catch (err) {
+    console.error('Error fetching properties:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchBookings = async () => {
     try {
@@ -102,77 +97,68 @@ function HostDashboard({ showToast }) {
   };
 
   const handleDeleteProperty = async (propertyId) => {
-    if (!window.confirm('Are you sure you want to delete this property?')) return;
-    
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/host/properties/${propertyId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        showToast('✅ Property deleted successfully!');
-        fetchProperties();
-      } else {
-        const data = await response.json();
-        showToast(`❌ ${data.error}`);
-      }
-    } catch (err) {
-      showToast('❌ Error deleting property');
+  if (!window.confirm('Are you sure you want to delete this property?')) return;
+  try {
+    const host = JSON.parse(localStorage.getItem('host_user'));
+    const response = await fetch(
+      `http://localhost:5000/api/host/properties/${propertyId}?host_id=${host.host_id}`,
+      { method: 'DELETE' }
+    );
+    if (response.ok) {
+      showToast('✅ Property deleted!');
+      fetchProperties();
     }
-  };
+  } catch (err) {
+    showToast('❌ Error deleting property');
+  }
+};
 
   const handleSubmitProperty = async (e) => {
-    e.preventDefault();
-    
-    if (!propertyForm.title || !propertyForm.location || !propertyForm.price) {
-      showToast('⚠️ Please fill in all required fields.');
-      return;
-    }
+  e.preventDefault();
 
-    try {
-      const token = localStorage.getItem('token');
-      const url = editingProperty 
-        ? `http://localhost:5000/api/host/properties/${editingProperty.property_id}`
-        : 'http://localhost:5000/api/host/properties';
-      
-      const method = editingProperty ? 'PUT' : 'POST';
-      
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          title: propertyForm.title,
-          location: propertyForm.location,
-          price: parseFloat(propertyForm.price),
-          img: propertyForm.img || null,
-          tags: propertyForm.tags,
-          badge: propertyForm.badge || null,
-          category: propertyForm.category || null,
-          description: propertyForm.description || null,
-          video: propertyForm.video || null,
-          status: propertyForm.status
-        })
-      });
-      
-      if (response.ok) {
-        showToast(editingProperty ? '✅ Property updated!' : '✅ Property added!');
-        setShowPropertyModal(false);
-        fetchProperties();
-      } else {
-        const data = await response.json();
-        showToast(`❌ ${data.error}`);
-      }
-    } catch (err) {
-      showToast('❌ Error saving property');
+  if (!propertyForm.title || !propertyForm.location || !propertyForm.price) {
+    showToast('⚠️ Please fill in all required fields.');
+    return;
+  }
+
+  try {
+    const host = JSON.parse(localStorage.getItem('host_user'));
+    const url = editingProperty
+      ? `http://localhost:5000/api/host/properties/${editingProperty.property_id}`
+      : 'http://localhost:5000/api/host/properties';
+
+    const method = editingProperty ? 'PUT' : 'POST';
+
+    const response = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        host_id: host.host_id,   // <-- this is the key part
+        title: propertyForm.title,
+        location: propertyForm.location,
+        price: parseFloat(propertyForm.price),
+        img: propertyForm.img || null,
+        tags: propertyForm.tags,
+        badge: propertyForm.badge || null,
+        category: propertyForm.category || null,
+        description: propertyForm.description || null,
+        video: propertyForm.video || null,
+        status: propertyForm.status
+      })
+    });
+
+    if (response.ok) {
+      showToast(editingProperty ? '✅ Property updated!' : '✅ Property added!');
+      setShowPropertyModal(false);
+      fetchProperties();
+    } else {
+      const data = await response.json();
+      showToast(`❌ ${data.error}`);
     }
-  };
+  } catch (err) {
+    showToast('❌ Error saving property');
+  }
+};
 
   const handleBookingAction = async (bookingId, action) => {
     try {
