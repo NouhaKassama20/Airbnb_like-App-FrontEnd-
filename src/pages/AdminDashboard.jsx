@@ -57,10 +57,16 @@ function AdminDashboard({ showToast }) {
   const [complaints,       setComplaints]        = useState([])
   const [transactions,     setTransactions]      = useState([])
 
+
+
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true)
       setError(null)
+  
+   
+
+
       try {
         const [
           statsRes,
@@ -82,6 +88,7 @@ function AdminDashboard({ showToast }) {
           fetch(`${API}/transactions`),
         ])
 
+
         const statsData        = await statsRes.json()
         const bookingsData     = await bookingsRes.json()
         const revenueData      = await revenueRes.json()
@@ -100,7 +107,8 @@ function AdminDashboard({ showToast }) {
         console.log('users',        usersData)
         console.log('complaints',   complaintsData)
         console.log('transactions', transactionsData)
-
+   
+        
         setStats(
           statsData?.houses !== undefined
             ? statsData
@@ -124,6 +132,8 @@ function AdminDashboard({ showToast }) {
 
     fetchAll()
   }, [])
+
+ 
 
   const handleBanUser = async (id, name) => {
     try {
@@ -276,7 +286,9 @@ function AdminDashboard({ showToast }) {
                       formatter={v => [`${v.toLocaleString()} DZD`, 'Revenue']}
                     />
                     <Bar dataKey="revenue" fill="#c9a84c" radius={[6, 6, 0, 0]} />
-                  </BarChart>
+                  </BarChart> 
+                  
+                  
                 </ResponsiveContainer>
               </ChartCard>
             </div>
@@ -402,8 +414,9 @@ function AdminDashboard({ showToast }) {
                 <tbody>
                   {complaints.map(c => (
                     <tr key={c.complaint_id}>
-                      <td>{c.guest?.user?.full_name || '—'}</td>
-                      <td>{c.target?.full_name      || '—'}</td>
+                     <td>{c.guest_name || '—'}</td>
+<td>{c.target_name || '—'}</td>
+
                       <td>{c.description}</td>
                       <td>{c.status}</td>
                       <td>{new Date(c.created_at).toLocaleDateString()}</td>
@@ -442,7 +455,9 @@ function AdminDashboard({ showToast }) {
                 <tbody>
                   {transactions.map(t => (
                     <tr key={t.payment_id}>
-                      <td>{t.guest?.user?.full_name || '—'}</td>
+                   
+                     <td>{t.guest_name || '—'}</td>
+
                       <td>{t.total_price.toLocaleString()} DZD</td>
                       <td>{t.pay_method}</td>
                       <td>{t.status}</td>
@@ -459,5 +474,6 @@ function AdminDashboard({ showToast }) {
     </section>
   );
 }
+
 
 export default AdminDashboard;
