@@ -9,15 +9,59 @@ function HostLoginPage({ showToast }) {
   const [tab, setTab] = useState('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [username, setUsername] = useState('');
+  const [age, setAge] = useState('');
+  const [numTele, setNumTele] = useState('');
+  const [wilaya, setWilaya] = useState('');
+  const [emploi, setEmploi] = useState('');
+  const [secQst, setSecQst] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Algerian wilayas list
+  const algerianWilayas = [
+    'Adrar', 'Chlef', 'Laghouat', 'Oum El Bouaghi', 'Batna', 'Béjaïa', 'Biskra', 'Béchar',
+    'Blida', 'Bouira', 'Tamanrasset', 'Tébessa', 'Tlemcen', 'Tiaret', 'Tizi Ouzou', 'Algiers',
+    'Djelfa', 'Jijel', 'Sétif', 'Saïda', 'Skikda', 'Sidi Bel Abbès', 'Annaba', 'Guelma',
+    'Constantine', 'Médéa', 'Mostaganem', 'M\'Sila', 'Mascara', 'Ouargla', 'Oran', 'El Bayadh',
+    'Illizi', 'Bordj Bou Arréridj', 'Boumerdès', 'El Tarf', 'Tindouf', 'Tissemsilt', 'El Oued',
+    'Khenchela', 'Souk Ahras', 'Tipaza', 'Mila', 'Aïn Defla', 'Naâma', 'Aïn Témouchent', 'Ghardaïa',
+    'Relizane', 'Timimoun', 'Bordj Badji Mokhtar', 'Ouled Djellal', 'Béni Abbès', 'In Salah',
+    'In Guezzam', 'Touggourt', 'Djanet', 'El M\'Ghair', 'El Menia'
+  ];
+
+  // Employment options
+  const employmentOptions = [
+    'Student', 'Employed Full-time', 'Employed Part-time', 'Self-employed',
+    'Business Owner', 'Freelancer', 'Homemaker', 'Retired', 'Unemployed', 'Other'
+  ];
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   const handleAuth = async (e) => {
     e.preventDefault();
-    if (!email || !password) { showToast('⚠️ Please fill in all fields.'); return; }
+    
+    if (tab === 'signin') {
+      if (!email || !password) { 
+        showToast('⚠️ Please fill in all fields.'); 
+        return; 
+      }
+    } else {
+      // Signup validations
+      if (!fullName || !email || !password || !username) { 
+        showToast('⚠️ Please fill in all required fields (*).'); 
+        return; 
+      }
+      if (age && (age < 18 || age > 120)) {
+        showToast('⚠️ Age must be between 18 and 120.');
+        return;
+      }
+      if (numTele && !/^(\+?213|0)?[5-7]\d{8}$/.test(numTele.replace(/\s/g, ''))) {
+        showToast('⚠️ Please enter a valid Algerian phone number.');
+        return;
+      }
+    }
+    
     setLoading(true);
     try {
       if (tab === 'signin') {
@@ -25,9 +69,31 @@ function HostLoginPage({ showToast }) {
         showToast('✨ Welcome back!');
         navigate('/host/setup');
       } else {
-        if (!name || !username) { showToast('⚠️ Name and username are required.'); setLoading(false); return; }
-        await hostSignup({ full_name: name, email, password, username });
+        // Prepare signup data matching users table schema
+        const signupData = {
+          full_name: fullName,
+          email,
+          password,
+          username,
+          age: age ? parseInt(age) : null,
+          num_tele: numTele || null,
+          wilaya: wilaya || null,
+          emploi: emploi || null,
+          sec_qst: secQst || null
+        };
+        
+        await hostSignup(signupData);
         showToast('✨ Account created! Please sign in.');
+        // Reset form and switch to signin
+        setFullName('');
+        setEmail('');
+        setPassword('');
+        setUsername('');
+        setAge('');
+        setNumTele('');
+        setWilaya('');
+        setEmploi('');
+        setSecQst('');
         setTab('signin');
       }
     } catch (err) {
@@ -55,7 +121,7 @@ function HostLoginPage({ showToast }) {
       justifyContent: 'center',
       padding: '120px 24px 60px',
       position: 'relative',
-      overflow: 'hidden'
+      overflow: 'auto'
     }}>
       <div style={{
         position: 'absolute', top: '-200px', right: '-200px',
@@ -70,7 +136,7 @@ function HostLoginPage({ showToast }) {
         pointerEvents: 'none'
       }} />
 
-      <div style={{ width: '100%', maxWidth: '460px', position: 'relative', zIndex: 1 }}>
+      <div style={{ width: '100%', maxWidth: '520px', position: 'relative', zIndex: 1 }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div className="section-eyebrow" style={{ justifyContent: 'center', color: 'var(--gold)', marginBottom: '16px' }}>
@@ -113,37 +179,148 @@ function HostLoginPage({ showToast }) {
           {/* Form */}
           <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-            {/* Full Name - signup only */}
+            {/* Signup-only fields - matching users table */}
             {tab === 'signup' && (
-              <div className="form-field">
-                <label style={{ color: 'rgba(255,255,255,0.7)' }}>Full Name</label>
-                <input
-                  type="text"
-                  placeholder="Jane Smith"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                  style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
-                />
-              </div>
+              <>
+                {/* Full Name - required */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    Full Name <span style={{ color: 'var(--gold)' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="John Doe"
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                  />
+                </div>
+
+                {/* Username - required */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    Username <span style={{ color: 'var(--gold)' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="john_doe"
+                    value={username}
+                    onChange={e => setUsername(e.target.value.toLowerCase().replace(/\s/g, '_'))}
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                  />
+                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '4px' }}>
+                    Only lowercase letters, numbers, and underscores
+                  </p>
+                </div>
+
+                {/* Age - optional */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Age</label>
+                  <input
+                    type="number"
+                    placeholder="25"
+                    value={age}
+                    onChange={e => setAge(e.target.value)}
+                    min="18"
+                    max="120"
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                  />
+                </div>
+
+                {/* Phone Number - optional with Algerian format */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Phone Number</label>
+                  <input
+                    type="tel"
+                    placeholder="05XX XX XX XX"
+                    value={numTele}
+                    onChange={e => setNumTele(e.target.value)}
+                    style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
+                  />
+                  <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '4px' }}>
+                    Format: 05XXXXXXXX or +213XXXXXXXXX
+                  </p>
+                </div>
+
+                {/* Wilaya (Algerian province) - optional */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Wilaya (Province)</label>
+                  <select
+                    value={wilaya}
+                    onChange={e => setWilaya(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: 'rgba(255,255,255,0.07)',
+                      border: '1px solid rgba(201,168,76,0.2)',
+                      borderRadius: '10px',
+                      padding: '14px 16px',
+                      color: 'var(--white)',
+                      fontSize: '15px',
+                      fontFamily: "'DM Sans', sans-serif",
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="" style={{ background: 'var(--navy)' }}>Select your wilaya</option>
+                    {algerianWilayas.map(w => (
+                      <option key={w} value={w} style={{ background: 'var(--navy)' }}>{w}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Employment - optional */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Employment Status</label>
+                  <select
+                    value={emploi}
+                    onChange={e => setEmploi(e.target.value)}
+                    style={{
+                      width: '100%',
+                      background: 'rgba(255,255,255,0.07)',
+                      border: '1px solid rgba(201,168,76,0.2)',
+                      borderRadius: '10px',
+                      padding: '14px 16px',
+                      color: 'var(--white)',
+                      fontSize: '15px',
+                      fontFamily: "'DM Sans', sans-serif",
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <option value="" style={{ background: 'var(--navy)' }}>Select employment status</option>
+                    {employmentOptions.map(opt => (
+                      <option key={opt} value={opt} style={{ background: 'var(--navy)' }}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Security Question - optional */}
+                <div className="form-field">
+                  <label style={{ color: 'rgba(255,255,255,0.7)' }}>Security Question</label>
+                  <textarea
+                    placeholder="e.g., What was your first pet's name?"
+                    value={secQst}
+                    onChange={e => setSecQst(e.target.value)}
+                    rows={2}
+                    style={{
+                      width: '100%',
+                      background: 'rgba(255,255,255,0.07)',
+                      border: '1px solid rgba(201,168,76,0.2)',
+                      borderRadius: '10px',
+                      padding: '14px 16px',
+                      color: 'var(--white)',
+                      fontSize: '15px',
+                      fontFamily: "'DM Sans', sans-serif",
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+              </>
             )}
 
-            {/* Username - signup only */}
-            {tab === 'signup' && (
-              <div className="form-field">
-                <label style={{ color: 'rgba(255,255,255,0.7)' }}>Username</label>
-                <input
-                  type="text"
-                  placeholder="jane_host"
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
-                />
-              </div>
-            )}
-
-            {/* Email */}
+            {/* Email - required for both */}
             <div className="form-field">
-              <label style={{ color: 'rgba(255,255,255,0.7)' }}>Email Address</label>
+              <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Email Address <span style={{ color: 'var(--gold)' }}>*</span>
+              </label>
               <input
                 type="email"
                 placeholder="your@email.com"
@@ -153,9 +330,11 @@ function HostLoginPage({ showToast }) {
               />
             </div>
 
-            {/* Password */}
+            {/* Password - required for both */}
             <div className="form-field">
-              <label style={{ color: 'rgba(255,255,255,0.7)' }}>Password</label>
+              <label style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Password <span style={{ color: 'var(--gold)' }}>*</span>
+              </label>
               <input
                 type="password"
                 placeholder="••••••••"
@@ -163,6 +342,11 @@ function HostLoginPage({ showToast }) {
                 onChange={e => setPassword(e.target.value)}
                 style={{ background: 'rgba(255,255,255,0.07)', color: 'var(--white)', borderColor: 'rgba(201,168,76,0.2)' }}
               />
+              {tab === 'signup' && (
+                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px', marginTop: '4px' }}>
+                  Password must be at least 6 characters
+                </p>
+              )}
             </div>
 
             {tab === 'signin' && (
