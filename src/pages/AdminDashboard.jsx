@@ -1,4 +1,3 @@
-// src/pages/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import {
   ResponsiveContainer,
@@ -8,58 +7,7 @@ import {
   XAxis, YAxis, Tooltip, Legend, CartesianGrid
 } from 'recharts';
 
-// ── Chart Data ───────────────────────────────────────────────
-const bookingsPerMonth = [
-  { month: 'Jan', bookings: 18 },
-  { month: 'Feb', bookings: 27 },
-  { month: 'Mar', bookings: 35 },
-  { month: 'Apr', bookings: 42 },
-  { month: 'May', bookings: 61 },
-  { month: 'Jun', bookings: 74 },
-  { month: 'Jul', bookings: 95 },
-  { month: 'Aug', bookings: 88 },
-  { month: 'Sep', bookings: 52 },
-  { month: 'Oct', bookings: 39 },
-  { month: 'Nov', bookings: 28 },
-  { month: 'Dec', bookings: 21 },
-];
-
-const revenuePerMonth = [
-  { month: 'Jan', revenue: 84000 },
-  { month: 'Feb', revenue: 120000 },
-  { month: 'Mar', revenue: 158000 },
-  { month: 'Apr', revenue: 193000 },
-  { month: 'May', revenue: 271000 },
-  { month: 'Jun', revenue: 340000 },
-  { month: 'Jul', revenue: 428000 },
-  { month: 'Aug', revenue: 395000 },
-  { month: 'Sep', revenue: 234000 },
-  { month: 'Oct', revenue: 175000 },
-  { month: 'Nov', revenue: 126000 },
-  { month: 'Dec', revenue: 98000 },
-];
-
-const listingsByWilaya = [
-  { wilaya: 'Alger',       listings: 38 },
-  { wilaya: 'Oran',        listings: 24 },
-  { wilaya: 'Annaba',      listings: 18 },
-  { wilaya: 'Tlemcen',     listings: 14 },
-  { wilaya: 'Béjaïa',      listings: 12 },
-  { wilaya: 'Tamanrasset', listings: 8  },
-  { wilaya: 'Sétif',       listings: 6  },
-];
-
-const bookingStatusData = [
-  { name: 'Confirmed', value: 68 },
-  { name: 'Pending',   value: 18 },
-  { name: 'Cancelled', value: 14 },
-];
-
-const propertyTypeData = [
-  { name: 'Apartment', value: 52 },
-  { name: 'Villa',     value: 28 },
-  { name: 'House',     value: 20 },
-];
+const API = 'http://localhost:5000/api/admin'
 
 const STATUS_COLORS = ['#c9a84c', '#1e3356', '#8a8070'];
 const TYPE_COLORS   = ['#c9a84c', '#13213a', '#d4cfc4'];
@@ -72,7 +20,6 @@ const tooltipStyle = {
   fontSize: '13px',
 };
 
-// ── Reusable chart card ──────────────────────────────────────
 function ChartCard({ title, children }) {
   return (
     <div style={{
@@ -96,41 +43,139 @@ function ChartCard({ title, children }) {
   );
 }
 
-// ────────────────────────────────────────────────────────────
 function AdminDashboard({ showToast }) {
-  const [stats, setStats] = useState({ houses: 0, clients: 0, complaints: 0 });
-  const [activeTab, setActiveTab] = useState('stats');
+  const [activeTab, setActiveTab]           = useState('stats')
+  const [loading,   setLoading]             = useState(true)
+  const [error,     setError]               = useState(null)
+
+  const [stats,            setStats]            = useState({ houses: 0, clients: 0, complaints: 0 })
+  const [bookingsPerMonth, setBookingsPerMonth]  = useState([])
+  const [revenuePerMonth,  setRevenuePerMonth]   = useState([])
+  const [listingsByWilaya, setListingsByWilaya]  = useState([])
+  const [bookingStatusData,setBookingStatusData] = useState([])
+  const [users,            setUsers]             = useState([])
+  const [complaints,       setComplaints]        = useState([])
+  const [transactions,     setTransactions]      = useState([])
 
   useEffect(() => {
-    const targets = { houses: 120, clients: 450, complaints: 12 };
-    const steps = {
-      houses:     targets.houses / 60,
-      clients:    targets.clients / 60,
-      complaints: targets.complaints / 60,
-    };
-    let current = { houses: 0, clients: 0, complaints: 0 };
-    const interval = setInterval(() => {
-      let allDone = true;
-      for (let key of ['houses', 'clients', 'complaints']) {
-        if (current[key] < targets[key]) {
-          allDone = false;
-          current[key] = Math.min(current[key] + steps[key], targets[key]);
-        }
-      }
-      setStats({
-        houses:     Math.floor(current.houses),
-        clients:    Math.floor(current.clients),
-        complaints: Math.floor(current.complaints),
-      });
-      if (allDone) clearInterval(interval);
-    }, 25);
-    return () => clearInterval(interval);
-  }, []);
+    const fetchAll = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const [
+          statsRes,
+          bookingsRes,
+          revenueRes,
+          wilayaRes,
+          statusRes,
+          usersRes,
+          complaintsRes,
+          transactionsRes,
+        ] = await Promise.all([
+          fetch(`${API}/stats`),
+          fetch(`${API}/bookings-per-month`),
+          fetch(`${API}/revenue-per-month`),
+          fetch(`${API}/listings-by-wilaya`),
+          fetch(`${API}/booking-status`),
+          fetch(`${API}/users`),
+          fetch(`${API}/complaints`),
+          fetch(`${API}/transactions`),
+        ])
 
-  const handleBanUser          = (type, id) => showToast(`🚫 Banned ${type} with ID ${id}`);
-  const handleResolveComplaint = (id)       => showToast(`✅ Complaint ${id} resolved`);
-  const handleApproveHost      = (id)       => showToast(`✅ Host ${id} approved`);
-  const handleRejectHost       = (id)       => showToast(`❌ Host ${id} rejected`);
+        const statsData        = await statsRes.json()
+        const bookingsData     = await bookingsRes.json()
+        const revenueData      = await revenueRes.json()
+        const wilayaData       = await wilayaRes.json()
+        const statusData       = await statusRes.json()
+        const usersData        = await usersRes.json()
+        const complaintsData   = await complaintsRes.json()
+        const transactionsData = await transactionsRes.json()
+
+        // Debug logs — check DevTools Console
+        console.log('stats',        statsData)
+        console.log('bookings',     bookingsData)
+        console.log('revenue',      revenueData)
+        console.log('wilaya',       wilayaData)
+        console.log('status',       statusData)
+        console.log('users',        usersData)
+        console.log('complaints',   complaintsData)
+        console.log('transactions', transactionsData)
+
+        setStats(
+          statsData?.houses !== undefined
+            ? statsData
+            : { houses: 0, clients: 0, complaints: 0 }
+        )
+        setBookingsPerMonth( Array.isArray(bookingsData)     ? bookingsData     : [])
+        setRevenuePerMonth(  Array.isArray(revenueData)      ? revenueData      : [])
+        setListingsByWilaya( Array.isArray(wilayaData)       ? wilayaData       : [])
+        setBookingStatusData(Array.isArray(statusData)       ? statusData       : [])
+        setUsers(            Array.isArray(usersData)        ? usersData        : [])
+        setComplaints(       Array.isArray(complaintsData)   ? complaintsData   : [])
+        setTransactions(     Array.isArray(transactionsData) ? transactionsData : [])
+
+      } catch (err) {
+        console.error('fetchAll error:', err)
+        setError('Failed to connect to the server. Make sure your backend is running on port 5000.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAll()
+  }, [])
+
+  const handleBanUser = async (id, name) => {
+    try {
+      await fetch(`${API}/users/${id}`, { method: 'DELETE' })
+      setUsers(prev => prev.filter(u => u.user_id !== id))
+      showToast(`🚫 ${name} has been banned`)
+    } catch (err) {
+      console.error('Ban error:', err)
+      showToast('❌ Failed to ban user')
+    }
+  }
+
+  const handleResolveComplaint = async (id) => {
+    try {
+      await fetch(`${API}/complaints/${id}/resolve`, { method: 'PATCH' })
+      setComplaints(prev =>
+        prev.map(c => c.complaint_id === id ? { ...c, status: 'resolved' } : c)
+      )
+      showToast('✅ Complaint resolved')
+    } catch (err) {
+      console.error('Resolve error:', err)
+      showToast('❌ Failed to resolve complaint')
+    }
+  }
+
+  // ── Loading state ──
+  if (loading) return (
+    <div style={{
+      color: '#c9a84c',
+      padding: '60px',
+      textAlign: 'center',
+      fontSize: '18px'
+    }}>
+      Loading dashboard...
+    </div>
+  )
+
+  // ── Error state ──
+  if (error) return (
+    <div style={{
+      color: '#ff6b6b',
+      padding: '60px',
+      textAlign: 'center',
+      fontSize: '16px',
+      background: '#13213a',
+      borderRadius: '16px',
+      margin: '40px',
+    }}>
+      <div style={{ fontSize: '32px', marginBottom: '16px' }}>⚠️</div>
+      {error}
+    </div>
+  )
 
   return (
     <section className="admin-dashboard">
@@ -144,10 +189,8 @@ function AdminDashboard({ showToast }) {
         {[
           ['stats',        'Statistics'],
           ['users',        'Users'],
-          ['verification', 'Host Verification'],
           ['complaints',   'Complaints'],
           ['transactions', 'Transactions'],
-          ['logs',         'Audit Logs'],
         ].map(([key, label]) => (
           <button
             key={key}
@@ -159,7 +202,6 @@ function AdminDashboard({ showToast }) {
         ))}
       </div>
 
-      {/* Content */}
       <div className="admin-content">
 
         {/* ── STATISTICS ── */}
@@ -170,11 +212,11 @@ function AdminDashboard({ showToast }) {
             <div className="admin-stats">
               <div className="stat-card">
                 <div className="stat-num">{stats.houses}</div>
-                <div className="stat-label">Houses Rented</div>
+                <div className="stat-label">Properties Listed</div>
               </div>
               <div className="stat-card">
                 <div className="stat-num">{stats.clients}</div>
-                <div className="stat-label">Clients Registered</div>
+                <div className="stat-label">Guests Registered</div>
               </div>
               <div className="stat-card">
                 <div className="stat-num">{stats.complaints}</div>
@@ -182,9 +224,13 @@ function AdminDashboard({ showToast }) {
               </div>
             </div>
 
-            {/* Row 1 — Line chart + Bar chart */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '36px' }}>
-
+            {/* Row 1 */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '24px',
+              marginTop: '36px'
+            }}>
               <ChartCard title="Bookings per Month">
                 <ResponsiveContainer width="100%" height={240}>
                   <LineChart data={bookingsPerMonth}>
@@ -192,13 +238,11 @@ function AdminDashboard({ showToast }) {
                     <XAxis
                       dataKey="month"
                       tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
+                      axisLine={false} tickLine={false}
                     />
                     <YAxis
                       tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
+                      axisLine={false} tickLine={false}
                     />
                     <Tooltip contentStyle={tooltipStyle} />
                     <Line
@@ -220,13 +264,11 @@ function AdminDashboard({ showToast }) {
                     <XAxis
                       dataKey="month"
                       tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
+                      axisLine={false} tickLine={false}
                     />
                     <YAxis
                       tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
+                      axisLine={false} tickLine={false}
                       tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
                     />
                     <Tooltip
@@ -237,12 +279,15 @@ function AdminDashboard({ showToast }) {
                   </BarChart>
                 </ResponsiveContainer>
               </ChartCard>
-
             </div>
 
-            {/* Row 2 — Horizontal bar + 2 Donuts */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '24px', marginTop: '24px' }}>
-
+            {/* Row 2 */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '24px',
+              marginTop: '24px'
+            }}>
               <ChartCard title="Listings by Wilaya">
                 <ResponsiveContainer width="100%" height={240}>
                   <BarChart data={listingsByWilaya} layout="vertical" barSize={12}>
@@ -250,15 +295,13 @@ function AdminDashboard({ showToast }) {
                     <XAxis
                       type="number"
                       tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
+                      axisLine={false} tickLine={false}
                     />
                     <YAxis
                       dataKey="wilaya"
                       type="category"
                       tick={{ fill: 'rgba(255,255,255,0.55)', fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
+                      axisLine={false} tickLine={false}
                       width={85}
                     />
                     <Tooltip contentStyle={tooltipStyle} />
@@ -294,36 +337,8 @@ function AdminDashboard({ showToast }) {
                   </PieChart>
                 </ResponsiveContainer>
               </ChartCard>
-
-              <ChartCard title="Property Types">
-                <ResponsiveContainer width="100%" height={240}>
-                  <PieChart>
-                    <Pie
-                      data={propertyTypeData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="45%"
-                      outerRadius={75}
-                      innerRadius={38}
-                    >
-                      {propertyTypeData.map((_, i) => (
-                        <Cell key={i} fill={TYPE_COLORS[i % TYPE_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={tooltipStyle} />
-                    <Legend
-                      iconType="circle"
-                      iconSize={8}
-                      formatter={v => (
-                        <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 12 }}>{v}</span>
-                      )}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </ChartCard>
-
             </div>
+
           </div>
         )}
 
@@ -331,42 +346,38 @@ function AdminDashboard({ showToast }) {
         {activeTab === 'users' && (
           <div className="admin-users">
             <h2>Manage Users</h2>
-            <table className="admin-table">
-              <thead>
-                <tr><th>ID</th><th>Name</th><th>Role</th><th>Status</th><th>Actions</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>1</td><td>Ali</td><td>Host</td><td>Active</td>
-                  <td><button onClick={() => handleBanUser('host', 1)}>Ban</button></td>
-                </tr>
-                <tr>
-                  <td>2</td><td>Sara</td><td>Guest</td><td>Active</td>
-                  <td><button onClick={() => handleBanUser('guest', 2)}>Ban</button></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* ── HOST VERIFICATION ── */}
-        {activeTab === 'verification' && (
-          <div className="admin-verification">
-            <h2>Host Verification</h2>
-            <table className="admin-table">
-              <thead>
-                <tr><th>ID</th><th>Name</th><th>Document</th><th>Status</th><th>Actions</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>3</td><td>Yasmine</td><td>CNIE.pdf</td><td>Pending</td>
-                  <td>
-                    <button className="approve-btn" onClick={() => handleApproveHost(3)}>Approve</button>
-                    <button className="reject-btn"  onClick={() => handleRejectHost(3)}>Reject</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            {users.length === 0 ? (
+              <p style={{ color: 'rgba(255,255,255,0.4)' }}>No users found.</p>
+            ) : (
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Wilaya</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map(u => (
+                    <tr key={u.user_id}>
+                      <td>{u.full_name}</td>
+                      <td>{u.email}</td>
+                      <td>{u.wilaya}</td>
+                      <td>{u.role}</td>
+                      <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                      <td>
+                        <button onClick={() => handleBanUser(u.user_id, u.full_name)}>
+                          Ban
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 
@@ -374,16 +385,40 @@ function AdminDashboard({ showToast }) {
         {activeTab === 'complaints' && (
           <div className="admin-complaints">
             <h2>Complaints</h2>
-            <ul>
-              <li>
-                Complaint #101 — Host canceled last minute
-                <button onClick={() => handleResolveComplaint(101)}>Resolve</button>
-              </li>
-              <li>
-                Complaint #102 — Guest damaged property
-                <button onClick={() => handleResolveComplaint(102)}>Resolve</button>
-              </li>
-            </ul>
+            {complaints.length === 0 ? (
+              <p style={{ color: 'rgba(255,255,255,0.4)' }}>No complaints found.</p>
+            ) : (
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>From</th>
+                    <th>Against</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {complaints.map(c => (
+                    <tr key={c.complaint_id}>
+                      <td>{c.guest?.user?.full_name || '—'}</td>
+                      <td>{c.target?.full_name      || '—'}</td>
+                      <td>{c.description}</td>
+                      <td>{c.status}</td>
+                      <td>{new Date(c.created_at).toLocaleDateString()}</td>
+                      <td>
+                        {c.status !== 'resolved' && (
+                          <button onClick={() => handleResolveComplaint(c.complaint_id)}>
+                            Resolve
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 
@@ -391,31 +426,32 @@ function AdminDashboard({ showToast }) {
         {activeTab === 'transactions' && (
           <div className="admin-transactions">
             <h2>Transactions</h2>
-            <table className="admin-table">
-              <thead>
-                <tr><th>ID</th><th>User</th><th>Amount</th><th>Method</th><th>Status</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>201</td><td>Ali</td><td>5 000 DZD</td><td>Baridi Mob</td><td>Completed</td>
-                </tr>
-                <tr>
-                  <td>202</td><td>Sara</td><td>3 500 DZD</td><td>CCP</td><td>Pending</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* ── AUDIT LOGS ── */}
-        {activeTab === 'logs' && (
-          <div className="admin-logs">
-            <h2>Audit Logs</h2>
-            <ul>
-              <li>Admin banned Host #1 — 24/04/2026</li>
-              <li>Admin resolved Complaint #101 — 24/04/2026</li>
-              <li>Admin approved Host #3 — 24/04/2026</li>
-            </ul>
+            {transactions.length === 0 ? (
+              <p style={{ color: 'rgba(255,255,255,0.4)' }}>No transactions found.</p>
+            ) : (
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Guest</th>
+                    <th>Amount</th>
+                    <th>Method</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map(t => (
+                    <tr key={t.payment_id}>
+                      <td>{t.guest?.user?.full_name || '—'}</td>
+                      <td>{t.total_price.toLocaleString()} DZD</td>
+                      <td>{t.pay_method}</td>
+                      <td>{t.status}</td>
+                      <td>{new Date(t.created_at).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 
