@@ -481,3 +481,5 @@ function PropertyDetailPage({ showToast, onOpenBooking }) {
 }
 
 export default PropertyDetailPage;
+
+
