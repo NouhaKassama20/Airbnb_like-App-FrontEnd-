@@ -64,11 +64,14 @@ function HostLoginPage({ showToast }) {
     
     setLoading(true);
     try {
-      if (tab === 'signin') {
-        await hostLogin({ email, password });
-        showToast('✨ Welcome back!');
-        navigate('/host/setup');
-      } else {
+      // In HostLoginPage.jsx - update the handleAuth function
+// In HostLoginPage.jsx - Update the handleAuth function
+ // In HostLoginPage.jsx, find the handleAuth function and update:
+if (tab === 'signin') {
+  await hostLogin({ email, password });
+  showToast('✨ Welcome back!');
+  navigate('/host/dashboard'); // Change this line from '/host/setup' to '/host/dashboard'
+} else {
         // Prepare signup data matching users table schema
         const signupData = {
           full_name: fullName,
@@ -102,6 +105,7 @@ function HostLoginPage({ showToast }) {
       setLoading(false);
     }
   };
+
 
   const handleSocial = (provider) => {
     setLoading(true);
