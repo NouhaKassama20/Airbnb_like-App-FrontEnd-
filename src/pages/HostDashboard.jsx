@@ -85,7 +85,7 @@ function HostDashboard({ showToast }) {
       title: property.title,
       location: property.location,
       price: property.price,
-      img: property.img || '',
+      img: Array.isArray(property.img) ? property.img[0] : property.img || '',
       tags: property.tags || [],
       badge: property.badge || '',
       category: property.category || '',
@@ -137,7 +137,7 @@ function HostDashboard({ showToast }) {
         title: propertyForm.title,
         location: propertyForm.location,
         price: parseFloat(propertyForm.price),
-        img: propertyForm.img || null,
+        img: propertyForm.img ? [propertyForm.img] : null,
         tags: propertyForm.tags,
         badge: propertyForm.badge || null,
         category: propertyForm.category || null,
@@ -332,7 +332,7 @@ function HostDashboard({ showToast }) {
                   }}>
                     {property.img && (
                       <img 
-                        src={property.img} 
+                        src={Array.isArray(property.img) ? property.img[0] : property.img}
                         alt={property.title}
                         style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                         onError={(e) => e.target.style.display = 'none'}
