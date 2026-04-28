@@ -113,7 +113,7 @@ function StaysPage({ showToast, onOpenBooking }) {
                 <div
                   key={l.id}
                   style={{ minWidth: 220, width: 220, flexShrink: 0, cursor: 'pointer', background: 'transparent', fontFamily: 'inherit' }}
-                  onClick={() => navigate(`/property/${l.id}`)}
+                  onClick={() => navigate(`/property/${l.property_id}`)}
                 >
                   <div style={{ position: 'relative', width: '100%', aspectRatio: '3 / 2', borderRadius: 12, overflow: 'hidden' }}>
                     <img

@@ -11,3 +11,4 @@ export const fetchPropertyById = async (id) => {
   if (!res.ok) throw new Error('Failed to fetch property');
   return res.json();
 };
+
