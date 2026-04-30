@@ -103,7 +103,7 @@ function HomePage({ showToast }) {
           <div className="hero-particles" id="particles"></div>
         </div>
         <div className="hero-content">
-          <div className="hero-eyebrow">Rent or buy with ease.</div>
+          <div className="hero-eyebrow"></div>
           <h1 className="hero-title">
             
             Find your home<br /> across <em>Algeria</em>

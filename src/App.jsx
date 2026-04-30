@@ -14,10 +14,10 @@ import DestinationsPage from './pages/DestinationsPage';
 import ExperiencesPage from './pages/ExperiencesPage';
 import HostPage from './pages/HostPage';
 import HostLoginPage from './pages/HostLoginPage';
-import HostSetupPage from './pages/HostSetupPage'
 import PropertyDetailPage from './pages/PropertyDetailPage';
 import AboutPage from './pages/AboutPage';
 import AdminDashboard from './pages/AdminDashboard';
+import HostPropertyDetailPage from './pages/HostPropertyDetailPage';
 
 // In your App.jsx or router configuration
 import HostDashboard from './pages/HostDashboard';
@@ -128,10 +128,10 @@ function AppInner() {
         <Route path="/host" element={<HostPage showToast={showToast} />} />
         <Route path="/host/login" element={<HostLoginPage showToast={showToast} />} />
         <Route path="/host/dashboard" element={<HostDashboard showToast={showToast} />} />
-        <Route path="/host/setup" element={<HostSetupPage showToast={showToast} />} />
         <Route path="/property/:id" element={<PropertyDetailPage showToast={showToast} onOpenBooking={openBooking} />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/adminDashboard" element={<AdminDashboard showToast={showToast} />} />
+        <Route path="/host/property/:id" element={<HostPropertyDetailPage showToast={showToast} />} />
 
       </Routes>
 

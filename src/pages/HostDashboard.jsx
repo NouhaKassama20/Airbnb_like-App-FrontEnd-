@@ -1,5 +1,5 @@
 // src/pages/HostDashboard.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -12,19 +12,53 @@ function HostDashboard({ showToast }) {
   const [loading, setLoading] = useState(true);
   const [showPropertyModal, setShowPropertyModal] = useState(false);
   const [editingProperty, setEditingProperty] = useState(null);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  
+  // Image upload states
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const fileInputRef = useRef(null);
+  
+  // Video upload states
+  const [videoFile, setVideoFile] = useState(null);
+  const [videoPreview, setVideoPreview] = useState(null);
+  const [videoFileName, setVideoFileName] = useState('');
+  const videoInputRef = useRef(null);
+  
+  const [tagInput, setTagInput] = useState('');
+  
+  // Algerian Wilayas list
+  const algerianWilayas = [
+    "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", 
+    "Blida", "Bouira", "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Algiers", 
+    "Djelfa", "Jijel", "Sétif", "Saïda", "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", 
+    "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", "Ouargla", "Oran", "El Bayadh", 
+    "Illizi", "Bordj Bou Arréridj", "Boumerdès", "El Tarf", "Tindouf", "Tissemsilt", "El Oued", 
+    "Khenchela", "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma", "Aïn Témouchent", 
+    "Ghardaïa", "Relizane", "Timimoun", "Bordj Badji Mokhtar", "Ouled Djellal", "Béni Abbès", 
+    "In Salah", "In Guezzam", "Touggourt", "Djanet", "El Ménéa"
+  ];
+
+  // Extended property form with all fields
   const [propertyForm, setPropertyForm] = useState({
     title: '',
     location: '',
+    google_maps_url: '',
     price: '',
-    img: '',
+    rental_type: 'day',
     tags: [],
     badge: '',
     category: '',
     description: '',
     video: '',
-    status: 'pending'
+    status: 'pending',
+    voyageurs: '',
+    chambres: '',
+    salle_de_bain: '',
+    surface: '',
+    wilaya: ''
   });
-  const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
     fetchProperties();
@@ -32,18 +66,18 @@ function HostDashboard({ showToast }) {
   }, []);
 
   const fetchProperties = async () => {
-  try {
-    const host = JSON.parse(localStorage.getItem('host_user'));
-    if (!host) return;
-    const response = await fetch(`http://localhost:5000/api/host/properties?host_id=${host.host_id}`);
-    const data = await response.json();
-    if (response.ok) setProperties(data);
-  } catch (err) {
-    console.error('Error fetching properties:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      const host = JSON.parse(localStorage.getItem('host_user'));
+      if (!host) return;
+      const response = await fetch(`http://localhost:5000/api/host/properties?host_id=${host.host_id}`);
+      const data = await response.json();
+      if (response.ok) setProperties(data);
+    } catch (err) {
+      console.error('Error fetching properties:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchBookings = async () => {
     try {
@@ -62,103 +96,279 @@ function HostDashboard({ showToast }) {
     }
   };
 
+  // Image upload handling
+  const handleImageSelect = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (validFiles.length === 0) {
+      showToast('⚠️ Please select valid image files');
+      return;
+    }
+    
+    setImageFiles(prev => [...prev, ...validFiles]);
+    
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreviews(prev => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+  
+  const removeImage = (indexToRemove) => {
+    setImageFiles(prev => prev.filter((_, index) => index !== indexToRemove));
+    setImagePreviews(prev => prev.filter((_, index) => index !== indexToRemove));
+  };
+  
+  // Video upload handling
+  const handleVideoSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('video/')) {
+      showToast('⚠️ Please select a valid video file');
+      return;
+    }
+    
+    if (file.size > 100 * 1024 * 1024) {
+      showToast('⚠️ Video file size should be less than 100MB');
+      return;
+    }
+    
+    setVideoFile(file);
+    setVideoFileName(file.name);
+    const videoUrl = URL.createObjectURL(file);
+    setVideoPreview(videoUrl);
+  };
+  
+  const removeVideo = () => {
+    if (videoPreview && videoPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(videoPreview);
+    }
+    setVideoFile(null);
+    setVideoPreview(null);
+    setVideoFileName('');
+    if (videoInputRef.current) {
+      videoInputRef.current.value = '';
+    }
+  };
+  
+  const uploadImagesToServer = async () => {
+    if (imageFiles.length === 0) return [];
+    
+    const formData = new FormData();
+    imageFiles.forEach(file => {
+      formData.append('images', file);
+    });
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/upload/property-images', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data.imageUrls;
+      } else {
+        throw new Error('Upload failed');
+      }
+    } catch (err) {
+      console.error('Error uploading images:', err);
+      showToast('❌ Failed to upload images');
+      return [];
+    }
+  };
+  
+  const uploadVideoToServer = async () => {
+    if (!videoFile) return null;
+    
+    const formData = new FormData();
+    formData.append('video', videoFile);
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/upload/property-video', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data.videoUrl;
+      } else {
+        throw new Error('Video upload failed');
+      }
+    } catch (err) {
+      console.error('Error uploading video:', err);
+      showToast('❌ Failed to upload video');
+      return null;
+    }
+  };
+
   const handleAddProperty = () => {
     setEditingProperty(null);
     setPropertyForm({
       title: '',
       location: '',
+      google_maps_url: '',
       price: '',
-      img: '',
+      rental_type: 'day',
       tags: [],
       badge: '',
       category: '',
       description: '',
       video: '',
-      status: 'pending'
+      status: 'pending',
+      voyageurs: '',
+      chambres: '',
+      salle_de_bain: '',
+      surface: '',
+      wilaya: ''
     });
+    setImageFiles([]);
+    setImagePreviews([]);
+    setVideoFile(null);
+    setVideoPreview(null);
+    setVideoFileName('');
     setShowPropertyModal(true);
   };
 
   const handleEditProperty = (property) => {
     setEditingProperty(property);
     setPropertyForm({
-      title: property.title,
-      location: property.location,
-      price: property.price,
-      img: Array.isArray(property.img) ? property.img[0] : property.img || '',
+      title: property.title || '',
+      location: property.location || '',
+      google_maps_url: property.google_maps_url || '',
+      price: property.price || '',
+      rental_type: property.rental_type || 'day',
       tags: property.tags || [],
       badge: property.badge || '',
       category: property.category || '',
       description: property.description || '',
       video: property.video || '',
-      status: property.status
+      status: property.status || 'pending',
+      voyageurs: property.voyageurs || '',
+      chambres: property.chambres || '',
+      salle_de_bain: property.salle_de_bain || '',
+      surface: property.surface || '',
+      wilaya: property.wilaya || ''
     });
+    if (property.img && Array.isArray(property.img)) {
+      setImagePreviews(property.img);
+    } else if (property.img) {
+      setImagePreviews([property.img]);
+    }
+    if (property.video) {
+      setVideoPreview(property.video);
+      setVideoFileName('Existing video');
+    }
+    setImageFiles([]);
+    setVideoFile(null);
     setShowPropertyModal(true);
   };
 
   const handleDeleteProperty = async (propertyId) => {
-  if (!window.confirm('Are you sure you want to delete this property?')) return;
-  try {
-    const host = JSON.parse(localStorage.getItem('host_user'));
-    const response = await fetch(
-      `http://localhost:5000/api/host/properties/${propertyId}?host_id=${host.host_id}`,
-      { method: 'DELETE' }
-    );
-    if (response.ok) {
-      showToast('✅ Property deleted!');
-      fetchProperties();
+    if (!window.confirm('Are you sure you want to delete this property?')) return;
+    try {
+      const host = JSON.parse(localStorage.getItem('host_user'));
+      const response = await fetch(
+        `http://localhost:5000/api/host/properties/${propertyId}?host_id=${host.host_id}`,
+        { method: 'DELETE' }
+      );
+      if (response.ok) {
+        showToast('✅ Property deleted!');
+        fetchProperties();
+      }
+    } catch (err) {
+      showToast('❌ Error deleting property');
     }
-  } catch (err) {
-    showToast('❌ Error deleting property');
-  }
-};
+  };
 
   const handleSubmitProperty = async (e) => {
-  e.preventDefault();
-
-  if (!propertyForm.title || !propertyForm.location || !propertyForm.price) {
-    showToast('⚠️ Please fill in all required fields.');
-    return;
-  }
-
-  try {
-    const host = JSON.parse(localStorage.getItem('host_user'));
-    const url = editingProperty
-      ? `http://localhost:5000/api/host/properties/${editingProperty.property_id}`
-      : 'http://localhost:5000/api/host/properties';
-
-    const method = editingProperty ? 'PUT' : 'POST';
-
-    const response = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        host_id: host.host_id,   // <-- this is the key part
-        title: propertyForm.title,
-        location: propertyForm.location,
-        price: parseFloat(propertyForm.price),
-        img: propertyForm.img ? [propertyForm.img] : null,
-        tags: propertyForm.tags,
-        badge: propertyForm.badge || null,
-        category: propertyForm.category || null,
-        description: propertyForm.description || null,
-        video: propertyForm.video || null,
-        status: propertyForm.status
-      })
-    });
-
-    if (response.ok) {
-      showToast(editingProperty ? '✅ Property updated!' : '✅ Property added!');
-      setShowPropertyModal(false);
-      fetchProperties();
-    } else {
-      const data = await response.json();
-      showToast(`❌ ${data.error}`);
+    e.preventDefault();
+    
+    if (!propertyForm.title || !propertyForm.location || !propertyForm.price) {
+      showToast('⚠️ Please fill in all required fields.');
+      return;
     }
-  } catch (err) {
-    showToast('❌ Error saving property');
-  }
-};
+    
+    if (imageFiles.length === 0 && imagePreviews.length === 0 && !editingProperty) {
+      showToast('⚠️ Please upload at least one image.');
+      return;
+    }
+    
+    setUploadingImages(true);
+    setUploadingVideo(true);
+    
+    try {
+      let imageUrls = imagePreviews;
+      let videoUrl = propertyForm.video;
+      
+      if (imageFiles.length > 0) {
+        const uploadedUrls = await uploadImagesToServer();
+        if (uploadedUrls.length > 0) {
+          const existingUrls = imagePreviews.filter(url => url.startsWith('http'));
+          imageUrls = [...existingUrls, ...uploadedUrls];
+        }
+      }
+      
+      if (videoFile) {
+        const uploadedVideoUrl = await uploadVideoToServer();
+        if (uploadedVideoUrl) {
+          videoUrl = uploadedVideoUrl;
+        }
+      }
+      
+      const host = JSON.parse(localStorage.getItem('host_user'));
+      const url = editingProperty
+        ? `http://localhost:5000/api/host/properties/${editingProperty.property_id}`
+        : 'http://localhost:5000/api/host/properties';
+      
+      const method = editingProperty ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          host_id: host.host_id,
+          title: propertyForm.title,
+          location: propertyForm.location,
+          google_maps_url: propertyForm.google_maps_url,
+          price: parseFloat(propertyForm.price),
+          rental_type: propertyForm.rental_type,
+          img: imageUrls,
+          tags: propertyForm.tags,
+          badge: propertyForm.badge || null,
+          category: propertyForm.category || null,
+          description: propertyForm.description || null,
+          video: videoUrl,
+          status: propertyForm.status,
+          voyageurs: propertyForm.voyageurs ? parseInt(propertyForm.voyageurs) : null,
+          chambres: propertyForm.chambres ? parseInt(propertyForm.chambres) : null,
+          salle_de_bain: propertyForm.salle_de_bain ? parseInt(propertyForm.salle_de_bain) : null,
+          surface: propertyForm.surface || null,
+          wilaya: propertyForm.wilaya || null
+        })
+      });
+      
+      if (response.ok) {
+        showToast(editingProperty ? '✅ Property updated!' : '✅ Property added!');
+        setShowPropertyModal(false);
+        fetchProperties();
+      } else {
+        const data = await response.json();
+        showToast(`❌ ${data.error}`);
+      }
+    } catch (err) {
+      console.error('Error saving property:', err);
+      showToast('❌ Error saving property');
+    } finally {
+      setUploadingImages(false);
+      setUploadingVideo(false);
+    }
+  };
 
   const handleBookingAction = async (bookingId, action) => {
     try {
@@ -207,7 +417,6 @@ function HostDashboard({ showToast }) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      {/* Header -保持不变 */}
       <header style={{
         background: 'white',
         borderBottom: '1px solid #e0e0e0',
@@ -324,15 +533,26 @@ function HostDashboard({ showToast }) {
                 gap: '24px'
               }}>
                 {properties.map(property => (
-                  <div key={property.property_id} style={{
-                    background: 'white',
-                    borderRadius: '12px',
-                    overflow: 'hidden',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                  }}>
-                    {property.img && (
+                  <div key={property.property_id} 
+                    style={{
+                      background: 'white',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      transition: 'transform 0.2s, box-shadow 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                    }}
+                  >
+                    {property.img && property.img.length > 0 && (
                       <img 
-                        src={Array.isArray(property.img) ? property.img[0] : property.img}
+                        src={property.img[0]}
                         alt={property.title}
                         style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                         onError={(e) => e.target.style.display = 'none'}
@@ -352,37 +572,34 @@ function HostDashboard({ showToast }) {
                         </span>
                       </div>
                       
-                      <p style={{ color: '#666', fontSize: '14px', marginBottom: '12px' }}>
+                      <p style={{ color: '#666', fontSize: '14px', marginBottom: '8px' }}>
                         📍 {property.location}
                       </p>
                       
-                      <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#c9a84c', marginBottom: '12px' }}>
-                        ${property.price} <span style={{ fontSize: '14px', color: '#999' }}>/night</span>
-                      </p>
-                      
-                      {property.category && (
-                        <p style={{ color: '#888', fontSize: '13px', marginBottom: '8px' }}>
-                          Category: {property.category}
+                      {property.wilaya && (
+                        <p style={{ color: '#666', fontSize: '14px', marginBottom: '8px' }}>
+                          🏙️ Wilaya: {property.wilaya}
                         </p>
                       )}
                       
-                      {property.badge && (
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '4px 8px',
-                          background: '#c9a84c20',
-                          color: '#c9a84c',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          marginBottom: '12px'
-                        }}>
-                          {property.badge}
+                      <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#c9a84c', marginBottom: '12px' }}>
+                        {property.price} DA
+                        <span style={{ fontSize: '14px', color: '#999' }}>
+                          /{property.rental_type === 'day' ? 'night' : property.rental_type === 'month' ? 'month' : 'year'}
                         </span>
+                      </p>
+                      
+                      {(property.chambres || property.voyageurs || property.salle_de_bain) && (
+                        <div style={{ display: 'flex', gap: '12px', marginBottom: '12px', fontSize: '13px', color: '#666' }}>
+                          {property.voyageurs && <span>👥 {property.voyageurs} guests</span>}
+                          {property.chambres && <span>🛏️ {property.chambres} beds</span>}
+                          {property.salle_de_bain && <span>🚿 {property.salle_de_bain} baths</span>}
+                        </div>
                       )}
                       
                       {property.tags && property.tags.length > 0 && (
                         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                          {property.tags.map(tag => (
+                          {property.tags.slice(0, 3).map(tag => (
                             <span key={tag} style={{
                               padding: '4px 8px',
                               background: '#f0f0f0',
@@ -406,10 +623,11 @@ function HostDashboard({ showToast }) {
                             color: 'white',
                             border: 'none',
                             borderRadius: '6px',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            fontWeight: 500
                           }}
                         >
-                          Edit
+                          ✏️ Edit
                         </button>
                         <button
                           onClick={() => handleDeleteProperty(property.property_id)}
@@ -420,10 +638,26 @@ function HostDashboard({ showToast }) {
                             color: 'white',
                             border: 'none',
                             borderRadius: '6px',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            fontWeight: 500
                           }}
                         >
-                          Delete
+                          🗑️ Delete
+                        </button>
+                        <button
+                          onClick={() => navigate(`/host/property/${property.property_id}`)}
+                          style={{
+                            flex: 1,
+                            padding: '8px',
+                            background: '#c9a84c',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 500
+                          }}
+                        >
+                          View Details
                         </button>
                       </div>
                     </div>
@@ -434,7 +668,7 @@ function HostDashboard({ showToast }) {
           </>
         )}
 
-        {/* Bookings Tab - Shows guests who want to rent */}
+        {/* Bookings Tab */}
         {activeTab === 'bookings' && (
           <>
             <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '8px' }}>Guest Booking Requests</h2>
@@ -467,11 +701,6 @@ function HostDashboard({ showToast }) {
                         <p style={{ color: '#666', fontSize: '14px' }}>
                           📧 {booking.guest_email}
                         </p>
-                        {booking.guest_phone && (
-                          <p style={{ color: '#666', fontSize: '14px' }}>
-                            📞 {booking.guest_phone}
-                          </p>
-                        )}
                       </div>
                       <span style={{
                         padding: '4px 12px',
@@ -495,9 +724,6 @@ function HostDashboard({ showToast }) {
                         <strong>👥 Guests:</strong> {booking.guest_count} person{booking.guest_count !== 1 ? 's' : ''}
                       </p>
                       <p style={{ marginBottom: '8px' }}>
-                        <strong>📝 Message:</strong> {booking.message || 'No message provided'}
-                      </p>
-                      <p>
                         <strong>💰 Total Price:</strong> <span style={{ color: '#c9a84c', fontWeight: 'bold' }}>${booking.total_price}</span>
                       </p>
                     </div>
@@ -534,18 +760,6 @@ function HostDashboard({ showToast }) {
                         </button>
                       </div>
                     )}
-                    
-                    {booking.status !== 'pending' && (
-                      <div style={{
-                        padding: '10px',
-                        textAlign: 'center',
-                        background: booking.status === 'approved' ? '#e8f5e9' : '#ffebee',
-                        borderRadius: '6px',
-                        color: booking.status === 'approved' ? '#2e7d32' : '#d32f2f'
-                      }}>
-                        This booking has been {booking.status}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -572,7 +786,7 @@ function HostDashboard({ showToast }) {
           <div style={{
             background: 'white',
             borderRadius: '12px',
-            maxWidth: '600px',
+            maxWidth: '800px',
             width: '90%',
             maxHeight: '90vh',
             overflow: 'auto',
@@ -597,228 +811,577 @@ function HostDashboard({ showToast }) {
             </div>
 
             <form onSubmit={handleSubmitProperty}>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
-                  Title *
-                </label>
-                <input
-                  type="text"
-                  value={propertyForm.title}
-                  onChange={(e) => setPropertyForm({...propertyForm, title: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                  required
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
-                  Location *
-                </label>
-                <input
-                  type="text"
-                  value={propertyForm.location}
-                  onChange={(e) => setPropertyForm({...propertyForm, location: e.target.value})}
-                  placeholder="e.g., Downtown, City, Country"
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                  required
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
-                  Price per night ($) *
-                </label>
-                <input
-                  type="number"
-                  value={propertyForm.price}
-                  onChange={(e) => setPropertyForm({...propertyForm, price: e.target.value})}
-                  placeholder="150"
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                  required
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
-                  Image URL
-                </label>
-                <input
-                  type="text"
-                  value={propertyForm.img}
-                  onChange={(e) => setPropertyForm({...propertyForm, img: e.target.value})}
-                  placeholder="https://example.com/image.jpg"
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
-                  Category
-                </label>
-                <select
-                  value={propertyForm.category}
-                  onChange={(e) => setPropertyForm({...propertyForm, category: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                >
-                  <option value="">Select category</option>
-                  <option value="beachfront">Beachfront</option>
-                  <option value="mountain">Mountain View</option>
-                  <option value="city">City Center</option>
-                  <option value="countryside">Countryside</option>
-                  <option value="luxury">Luxury</option>
-                </select>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
-                  Badge
-                </label>
-                <input
-                  type="text"
-                  value={propertyForm.badge}
-                  onChange={(e) => setPropertyForm({...propertyForm, badge: e.target.value})}
-                  placeholder="e.g., Popular, New, Featured"
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
-                  Tags
-                </label>
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+              {/* Basic Information */}
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '16px', color: '#c9a84c' }}>Basic Information</h3>
+                
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                    Property Title *
+                  </label>
                   <input
                     type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    placeholder="e.g., WiFi, Pool, Parking"
+                    value={propertyForm.title}
+                    onChange={(e) => setPropertyForm({...propertyForm, title: e.target.value})}
+                    placeholder="e.g., Beautiful Beachfront Villa"
                     style={{
-                      flex: 1,
+                      width: '100%',
                       padding: '12px',
                       border: '1px solid #ddd',
                       borderRadius: '8px',
                       fontSize: '14px'
                     }}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                    required
                   />
-                  <button
-                    type="button"
-                    onClick={handleAddTag}
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                    Wilaya (Algerian Province) *
+                  </label>
+                  <select
+                    value={propertyForm.wilaya}
+                    onChange={(e) => setPropertyForm({...propertyForm, wilaya: e.target.value})}
                     style={{
-                      padding: '12px 20px',
-                      background: '#4c9aff',
-                      color: 'white',
-                      border: 'none',
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
                       borderRadius: '8px',
-                      cursor: 'pointer'
+                      fontSize: '14px'
+                    }}
+                    required
+                  >
+                    <option value="">Select Wilaya</option>
+                    {algerianWilayas.map(wilaya => (
+                      <option key={wilaya} value={wilaya}>{wilaya}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                    Address / Location
+                  </label>
+                  <input
+                    type="text"
+                    value={propertyForm.location}
+                    onChange={(e) => setPropertyForm({...propertyForm, location: e.target.value})}
+                    placeholder="Full address of the property"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                    Google Maps URL *
+                  </label>
+                  <input
+                    type="url"
+                    value={propertyForm.google_maps_url}
+                    onChange={(e) => setPropertyForm({...propertyForm, google_maps_url: e.target.value})}
+                    placeholder="https://maps.google.com/..."
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                    required
+                  />
+                  <p style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
+                    Paste the Google Maps share link for your property location
+                  </p>
+                </div>
+              </div>
+
+              {/* Property Details */}
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '16px', color: '#c9a84c' }}>Property Details</h3>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                      Max Guests (voyageurs)
+                    </label>
+                    <input
+                      type="number"
+                      value={propertyForm.voyageurs}
+                      onChange={(e) => setPropertyForm({...propertyForm, voyageurs: e.target.value})}
+                      placeholder="Number of guests"
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #ddd',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                      Bedrooms (chambres)
+                    </label>
+                    <input
+                      type="number"
+                      value={propertyForm.chambres}
+                      onChange={(e) => setPropertyForm({...propertyForm, chambres: e.target.value})}
+                      placeholder="Number of bedrooms"
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #ddd',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                      Bathrooms (salle de bain)
+                    </label>
+                    <input
+                      type="number"
+                      value={propertyForm.salle_de_bain}
+                      onChange={(e) => setPropertyForm({...propertyForm, salle_de_bain: e.target.value})}
+                      placeholder="Number of bathrooms"
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #ddd',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+                  
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                      Surface Area (m²)
+                    </label>
+                    <input
+                      type="text"
+                      value={propertyForm.surface}
+                      onChange={(e) => setPropertyForm({...propertyForm, surface: e.target.value})}
+                      placeholder="e.g., 120 m²"
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #ddd',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing Information with Rental Type */}
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '16px', color: '#c9a84c' }}>Pricing Information</h3>
+                
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                    Rental Type *
+                  </label>
+                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                    <label style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px', 
+                      cursor: 'pointer',
+                      padding: '10px 20px',
+                      border: propertyForm.rental_type === 'day' ? '2px solid #c9a84c' : '1px solid #ddd',
+                      borderRadius: '8px',
+                      background: propertyForm.rental_type === 'day' ? '#c9a84c10' : 'white',
+                      transition: 'all 0.2s'
+                    }}>
+                      <input
+                        type="radio"
+                        name="rental_type"
+                        value="day"
+                        checked={propertyForm.rental_type === 'day'}
+                        onChange={(e) => setPropertyForm({...propertyForm, rental_type: e.target.value})}
+                        style={{ margin: 0 }}
+                      />
+                      <span style={{ fontSize: '14px' }}>📅 Per Day</span>
+                    </label>
+                    
+                    <label style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px', 
+                      cursor: 'pointer',
+                      padding: '10px 20px',
+                      border: propertyForm.rental_type === 'month' ? '2px solid #c9a84c' : '1px solid #ddd',
+                      borderRadius: '8px',
+                      background: propertyForm.rental_type === 'month' ? '#c9a84c10' : 'white',
+                      transition: 'all 0.2s'
+                    }}>
+                      <input
+                        type="radio"
+                        name="rental_type"
+                        value="month"
+                        checked={propertyForm.rental_type === 'month'}
+                        onChange={(e) => setPropertyForm({...propertyForm, rental_type: e.target.value})}
+                        style={{ margin: 0 }}
+                      />
+                      <span style={{ fontSize: '14px' }}>📆 Per Month</span>
+                    </label>
+                    
+                    <label style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px', 
+                      cursor: 'pointer',
+                      padding: '10px 20px',
+                      border: propertyForm.rental_type === 'year' ? '2px solid #c9a84c' : '1px solid #ddd',
+                      borderRadius: '8px',
+                      background: propertyForm.rental_type === 'year' ? '#c9a84c10' : 'white',
+                      transition: 'all 0.2s'
+                    }}>
+                      <input
+                        type="radio"
+                        name="rental_type"
+                        value="year"
+                        checked={propertyForm.rental_type === 'year'}
+                        onChange={(e) => setPropertyForm({...propertyForm, rental_type: e.target.value})}
+                        style={{ margin: 0 }}
+                      />
+                      <span style={{ fontSize: '14px' }}>🗓️ Per Year</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                    Price (DA) *
+                  </label>
+                  <input
+                    type="number"
+                    value={propertyForm.price}
+                    onChange={(e) => setPropertyForm({...propertyForm, price: e.target.value})}
+                    placeholder={`Enter price ${
+                      propertyForm.rental_type === 'day' ? 'per night' : 
+                      propertyForm.rental_type === 'month' ? 'per month' : 
+                      'per year'
+                    }`}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                    required
+                  />
+                  <p style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
+                    {propertyForm.rental_type === 'day' && 'Example: $150 per night'}
+                    {propertyForm.rental_type === 'month' && 'Example: $3,500 per month (usually 20-30% discount from daily rate)'}
+                    {propertyForm.rental_type === 'year' && 'Example: $35,000 per year (usually 40-50% discount from daily rate)'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Images Upload */}
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '16px', color: '#c9a84c' }}>Property Images</h3>
+                
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    border: '2px dashed #ddd',
+                    borderRadius: '8px',
+                    padding: '40px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    backgroundColor: '#f9f9f9',
+                    marginBottom: '16px'
+                  }}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageSelect}
+                    style={{ display: 'none' }}
+                  />
+                  <div style={{ fontSize: '48px', marginBottom: '8px' }}>📸</div>
+                  <p style={{ color: '#666' }}>Click to upload images from your device</p>
+                  <p style={{ fontSize: '12px', color: '#999' }}>You can select multiple images (JPG, PNG, GIF)</p>
+                </div>
+                
+                {imagePreviews.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '12px' }}>
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} style={{ position: 'relative' }}>
+                        <img 
+                          src={preview} 
+                          alt={`Preview ${index + 1}`}
+                          style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '8px' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          style={{
+                            position: 'absolute',
+                            top: '-8px',
+                            right: '-8px',
+                            background: '#dc2626',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '24px',
+                            height: '24px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Video Upload */}
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '16px', color: '#c9a84c' }}>Video Tour</h3>
+                
+                <div
+                  onClick={() => videoInputRef.current?.click()}
+                  style={{
+                    border: '2px dashed #ddd',
+                    borderRadius: '8px',
+                    padding: '40px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    backgroundColor: '#f9f9f9',
+                    transition: 'border-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#c9a84c'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
+                >
+                  <input
+                    ref={videoInputRef}
+                    type="file"
+                    accept="video/*"
+                    onChange={handleVideoSelect}
+                    style={{ display: 'none' }}
+                  />
+                  <div style={{ fontSize: '48px', marginBottom: '8px' }}>🎥</div>
+                  <p style={{ color: '#666' }}>Click to upload a video tour from your device</p>
+                  <p style={{ fontSize: '12px', color: '#999' }}>Supports MP4, WebM, MOV (Max 100MB)</p>
+                </div>
+                
+                {videoPreview && (
+                  <div style={{ marginTop: '16px' }}>
+                    {videoPreview.startsWith('http') && !videoPreview.startsWith('blob:') ? (
+                      <div style={{ 
+                        background: '#f0f0f0', 
+                        borderRadius: '8px', 
+                        padding: '16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <div style={{ fontSize: '32px' }}>🎬</div>
+                          <div>
+                            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Current Video</div>
+                            <a href={videoPreview} target="_blank" rel="noopener noreferrer" style={{ color: '#4c9aff', fontSize: '12px', wordBreak: 'break-all' }}>
+                              {videoPreview.substring(0, 50)}...
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ 
+                        borderRadius: '8px', 
+                        overflow: 'hidden',
+                        border: '1px solid #e0e0e0'
+                      }}>
+                        <video 
+                          src={videoPreview} 
+                          controls 
+                          style={{ width: '100%', maxHeight: '300px' }}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                        <div style={{ 
+                          padding: '12px', 
+                          background: '#f9f9f9',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}>
+                          <div style={{ fontSize: '13px', color: '#666' }}>
+                            📹 {videoFileName}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={removeVideo}
+                            style={{
+                              background: '#dc2626',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              padding: '6px 12px',
+                              cursor: 'pointer',
+                              fontSize: '12px'
+                            }}
+                          >
+                            Remove Video
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Description & Amenities */}
+              <div style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '18px', marginBottom: '16px', color: '#c9a84c' }}>Description & Amenities</h3>
+                
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                    Description
+                  </label>
+                  <textarea
+                    value={propertyForm.description}
+                    onChange={(e) => setPropertyForm({...propertyForm, description: e.target.value})}
+                    rows="4"
+                    placeholder="Describe your property, its unique features, nearby attractions, etc."
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                    Tags (Amenities)
+                  </label>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      placeholder="e.g., WiFi, Pool, Parking, Air Conditioning"
+                      style={{
+                        flex: 1,
+                        padding: '12px',
+                        border: '1px solid #ddd',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}
+                      onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddTag}
+                      style={{
+                        padding: '12px 20px',
+                        background: '#4c9aff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {propertyForm.tags.map(tag => (
+                      <span key={tag} style={{
+                        padding: '4px 12px',
+                        background: '#f0f0f0',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTag(tag)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            color: '#999',
+                            fontSize: '14px'
+                          }}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                    Category
+                  </label>
+                  <select
+                    value={propertyForm.category}
+                    onChange={(e) => setPropertyForm({...propertyForm, category: e.target.value})}
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '14px'
                     }}
                   >
-                    Add
-                  </button>
+                    <option value="">Select category</option>
+                    <option value="beachfront">Beachfront</option>
+                    <option value="mountain">Mountain View</option>
+                    <option value="city">City Center</option>
+                    <option value="countryside">Countryside</option>
+                    <option value="luxury">Luxury</option>
+                  </select>
                 </div>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {propertyForm.tags.map(tag => (
-                    <span key={tag} style={{
-                      padding: '4px 12px',
-                      background: '#f0f0f0',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      {tag}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTag(tag)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          color: '#999',
-                          fontSize: '14px'
-                        }}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
+                    Badge (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={propertyForm.badge}
+                    onChange={(e) => setPropertyForm({...propertyForm, badge: e.target.value})}
+                    placeholder="e.g., Popular, New, Featured"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '1px solid #ddd',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
                 </div>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
-                  Description
-                </label>
-                <textarea
-                  value={propertyForm.description}
-                  onChange={(e) => setPropertyForm({...propertyForm, description: e.target.value})}
-                  rows="4"
-                  placeholder="Describe your property..."
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    resize: 'vertical'
-                  }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>
-                  Video URL
-                </label>
-                <input
-                  type="text"
-                  value={propertyForm.video}
-                  onChange={(e) => setPropertyForm({...propertyForm, video: e.target.value})}
-                  placeholder="YouTube or Vimeo URL"
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                />
               </div>
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
@@ -838,17 +1401,19 @@ function HostDashboard({ showToast }) {
                 </button>
                 <button
                   type="submit"
+                  disabled={uploadingImages || uploadingVideo}
                   style={{
                     padding: '12px 24px',
                     background: '#c9a84c',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontWeight: 500
+                    cursor: (uploadingImages || uploadingVideo) ? 'not-allowed' : 'pointer',
+                    fontWeight: 500,
+                    opacity: (uploadingImages || uploadingVideo) ? 0.6 : 1
                   }}
                 >
-                  {editingProperty ? 'Update Property' : 'Add Property'}
+                  {(uploadingImages || uploadingVideo) ? 'Uploading...' : (editingProperty ? 'Update Property' : 'Add Property')}
                 </button>
               </div>
             </form>
