@@ -15,6 +15,24 @@ function HostDashboard({ showToast }) {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   
+  // Profile states
+  const [hostProfile, setHostProfile] = useState(null);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    full_name: '',
+    age: '',
+    num_tele: '',
+    email: '',
+    emploi: '',
+    wilaya: '',
+    username: '',
+    profile_image: ''
+  });
+  const profileImageInputRef = useRef(null);
+  const [profileImagePreview, setProfileImagePreview] = useState(null);
+  const [profileImageFile, setProfileImageFile] = useState(null);
+  const [uploadingProfileImage, setUploadingProfileImage] = useState(false);
+  
   // Image upload states
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -63,7 +81,131 @@ function HostDashboard({ showToast }) {
   useEffect(() => {
     fetchProperties();
     fetchBookings();
+    fetchHostProfile();
   }, []);
+
+  // Fetch host profile
+  const fetchHostProfile = async () => {
+    try {
+      const host = JSON.parse(localStorage.getItem('host_user'));
+      if (!host) return;
+      
+      const response = await fetch(`http://localhost:5000/api/hosts/${host.host_id}/profile`);
+      if (response.ok) {
+        const data = await response.json();
+        setHostProfile(data);
+        setProfileForm({
+          full_name: data.full_name || '',
+          age: data.age || '',
+          num_tele: data.num_tele || '',
+          email: data.email || '',
+          emploi: data.emploi || '',
+          wilaya: data.wilaya || '',
+          username: data.username || '',
+          profile_image: data.profile_image || ''
+        });
+        if (data.profile_image) {
+          setProfileImagePreview(data.profile_image);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching host profile:', err);
+    }
+  };
+
+  // Handle profile image selection
+  const handleProfileImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      showToast('⚠️ Please select a valid image file');
+      return;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('⚠️ Image size should be less than 5MB');
+      return;
+    }
+    
+    setProfileImageFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfileImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Upload profile image
+  const uploadProfileImage = async () => {
+    if (!profileImageFile) return null;
+    
+    const formData = new FormData();
+    formData.append('image', profileImageFile);
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/upload/profile-image', {
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data.imageUrl;
+      }
+      return null;
+    } catch (err) {
+      console.error('Error uploading profile image:', err);
+      return null;
+    }
+  };
+
+  // Update profile
+  const handleUpdateProfile = async () => {
+    try {
+      setUploadingProfileImage(true);
+      const host = JSON.parse(localStorage.getItem('host_user'));
+      if (!host) return;
+      
+      let profileImageUrl = profileForm.profile_image;
+      
+      if (profileImageFile) {
+        const uploadedUrl = await uploadProfileImage();
+        if (uploadedUrl) {
+          profileImageUrl = uploadedUrl;
+        }
+      }
+      
+      const response = await fetch(`http://localhost:5000/api/hosts/${host.host_id}/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: profileForm.full_name,
+          age: profileForm.age ? parseInt(profileForm.age) : null,
+          num_tele: profileForm.num_tele,
+          email: profileForm.email,
+          emploi: profileForm.emploi,
+          wilaya: profileForm.wilaya,
+          username: profileForm.username,
+          profile_image: profileImageUrl
+        })
+      });
+      
+      if (response.ok) {
+        showToast('✅ Profile updated successfully!');
+        setEditingProfile(false);
+        fetchHostProfile();
+      } else {
+        const data = await response.json();
+        showToast(`❌ ${data.error}`);
+      }
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      showToast('❌ Error updating profile');
+    } finally {
+      setUploadingProfileImage(false);
+    }
+  };
 
   const fetchProperties = async () => {
     try {
@@ -470,6 +612,21 @@ function HostDashboard({ showToast }) {
           >
             Booking Requests
           </button>
+          {/* My Profile Button - ADDED */}
+          <button
+            onClick={() => setActiveTab('profile')}
+            style={{
+              padding: '10px 20px',
+              background: activeTab === 'profile' ? '#c9a84c' : 'transparent',
+              color: activeTab === 'profile' ? 'white' : '#333',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 500
+            }}
+          >
+            My Profile
+          </button>
           <button
             onClick={handleLogout}
             style={{
@@ -765,6 +922,236 @@ function HostDashboard({ showToast }) {
               </div>
             )}
           </>
+        )}
+
+        {/* Profile Tab - ADDED */}
+        {activeTab === 'profile' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+              <div>
+                <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '8px' }}>My Profile</h2>
+                <p style={{ color: '#666' }}>View and manage your personal information</p>
+              </div>
+              {!editingProfile ? (
+                <button
+                  onClick={() => setEditingProfile(true)}
+                  style={{
+                    background: '#c9a84c',
+                    color: 'white',
+                    padding: '12px 24px',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '14px'
+                  }}
+                >
+                  ✏️ Edit Profile
+                </button>
+              ) : (
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    onClick={() => {
+                      setEditingProfile(false);
+                      fetchHostProfile();
+                    }}
+                    style={{
+                      padding: '12px 24px',
+                      background: '#f0f0f0',
+                      color: '#666',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: 500
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleUpdateProfile}
+                    disabled={uploadingProfileImage}
+                    style={{
+                      padding: '12px 24px',
+                      background: '#22c55e',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: uploadingProfileImage ? 'not-allowed' : 'pointer',
+                      fontWeight: 500,
+                      opacity: uploadingProfileImage ? 0.6 : 1
+                    }}
+                  >
+                    {uploadingProfileImage ? 'Uploading...' : '💾 Save Changes'}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ background: 'white', borderRadius: '12px', padding: '32px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+              {/* Profile Image */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '32px' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div 
+                    style={{
+                      width: '120px',
+                      height: '120px',
+                      borderRadius: '60px',
+                      background: '#f0f0f0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                      marginBottom: '12px',
+                      cursor: editingProfile ? 'pointer' : 'default'
+                    }}
+                    onClick={() => editingProfile && profileImageInputRef.current?.click()}
+                  >
+                    {profileImagePreview ? (
+                      <img 
+                        src={profileImagePreview} 
+                        alt="Profile" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: '48px' }}>👤</span>
+                    )}
+                    {editingProfile && (
+                      <input
+                        ref={profileImageInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfileImageSelect}
+                        style={{ display: 'none' }}
+                      />
+                    )}
+                  </div>
+                  {editingProfile && (
+                    <p style={{ fontSize: '12px', color: '#999' }}>Click to change profile picture</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Profile Information */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>Full Name</label>
+                  {editingProfile ? (
+                    <input
+                      type="text"
+                      value={profileForm.full_name}
+                      onChange={(e) => setProfileForm({...profileForm, full_name: e.target.value})}
+                      style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}
+                    />
+                  ) : (
+                    <p style={{ padding: '12px', background: '#f9f9f9', borderRadius: '8px', color: '#666' }}>
+                      {hostProfile?.full_name || 'Not specified'}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>Username</label>
+                  {editingProfile ? (
+                    <input
+                      type="text"
+                      value={profileForm.username}
+                      onChange={(e) => setProfileForm({...profileForm, username: e.target.value})}
+                      style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}
+                    />
+                  ) : (
+                    <p style={{ padding: '12px', background: '#f9f9f9', borderRadius: '8px', color: '#666' }}>
+                      {hostProfile?.username || 'Not specified'}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>Email</label>
+                  {editingProfile ? (
+                    <input
+                      type="email"
+                      value={profileForm.email}
+                      onChange={(e) => setProfileForm({...profileForm, email: e.target.value})}
+                      style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}
+                    />
+                  ) : (
+                    <p style={{ padding: '12px', background: '#f9f9f9', borderRadius: '8px', color: '#666' }}>
+                      {hostProfile?.email || 'Not specified'}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>Phone Number</label>
+                  {editingProfile ? (
+                    <input
+                      type="tel"
+                      value={profileForm.num_tele}
+                      onChange={(e) => setProfileForm({...profileForm, num_tele: e.target.value})}
+                      style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}
+                    />
+                  ) : (
+                    <p style={{ padding: '12px', background: '#f9f9f9', borderRadius: '8px', color: '#666' }}>
+                      {hostProfile?.num_tele || 'Not specified'}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>Age</label>
+                  {editingProfile ? (
+                    <input
+                      type="number"
+                      value={profileForm.age}
+                      onChange={(e) => setProfileForm({...profileForm, age: e.target.value})}
+                      style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}
+                    />
+                  ) : (
+                    <p style={{ padding: '12px', background: '#f9f9f9', borderRadius: '8px', color: '#666' }}>
+                      {hostProfile?.age || 'Not specified'}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>Employment / Job</label>
+                  {editingProfile ? (
+                    <input
+                      type="text"
+                      value={profileForm.emploi}
+                      onChange={(e) => setProfileForm({...profileForm, emploi: e.target.value})}
+                      placeholder="e.g., Engineer, Teacher, Student, etc."
+                      style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}
+                    />
+                  ) : (
+                    <p style={{ padding: '12px', background: '#f9f9f9', borderRadius: '8px', color: '#666' }}>
+                      {hostProfile?.emploi || 'Not specified'}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', color: '#333', fontWeight: 500 }}>Wilaya</label>
+                  {editingProfile ? (
+                    <select
+                      value={profileForm.wilaya}
+                      onChange={(e) => setProfileForm({...profileForm, wilaya: e.target.value})}
+                      style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}
+                    >
+                      <option value="">Select Wilaya</option>
+                      {algerianWilayas.map(wilaya => (
+                        <option key={wilaya} value={wilaya}>{wilaya}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <p style={{ padding: '12px', background: '#f9f9f9', borderRadius: '8px', color: '#666' }}>
+                      {hostProfile?.wilaya || 'Not specified'}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
