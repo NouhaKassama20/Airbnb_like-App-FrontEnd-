@@ -108,7 +108,8 @@ function AdminDashboard({ showToast }) {
         console.log('complaints',   complaintsData)
         console.log('transactions', transactionsData)
    
-        
+        console.log('revenue values:', revenueData.map(r => r.revenue))
+
         setStats(
           statsData?.houses !== undefined
             ? statsData
@@ -116,8 +117,12 @@ function AdminDashboard({ showToast }) {
         )
         setBookingsPerMonth( Array.isArray(bookingsData)     ? bookingsData     : [])
         setRevenuePerMonth(  Array.isArray(revenueData)      ? revenueData      : [])
+     //   setRevenuePerMonth(Array.isArray(revenueData) ? revenueData : []);
+      //  console.log('Revenue state after set:', revenueData);
         setListingsByWilaya( Array.isArray(wilayaData)       ? wilayaData       : [])
         setBookingStatusData(Array.isArray(statusData)       ? statusData       : [])
+      //  setBookingStatusData(Array.isArray(statusData) ? statusData : []);
+      //  console.log('Status state after set:', statusData);
         setUsers(            Array.isArray(usersData)        ? usersData        : [])
         setComplaints(       Array.isArray(complaintsData)   ? complaintsData   : [])
         setTransactions(     Array.isArray(transactionsData) ? transactionsData : [])
@@ -134,17 +139,29 @@ function AdminDashboard({ showToast }) {
   }, [])
 
  
-
-  const handleBanUser = async (id, name) => {
-    try {
-      await fetch(`${API}/users/${id}`, { method: 'DELETE' })
-      setUsers(prev => prev.filter(u => u.user_id !== id))
-      showToast(`🚫 ${name} has been banned`)
-    } catch (err) {
-      console.error('Ban error:', err)
-      showToast('❌ Failed to ban user')
-    }
+const handleBanUser = async (id, name) => {
+  try {
+    await fetch(`${API}/users/${id}/ban`, { method: 'PATCH' })
+    setUsers(prev =>
+      prev.map(u => u.user_id === id ? { ...u, is_banned: true } : u)
+    )
+    showToast(`🚫 ${name} has been banned`)
+  } catch (err) {
+    showToast('❌ Failed to ban user')
   }
+}
+
+const handleUnbanUser = async (id, name) => {
+  try {
+    await fetch(`${API}/users/${id}/unban`, { method: 'PATCH' })
+    setUsers(prev =>
+      prev.map(u => u.user_id === id ? { ...u, is_banned: false } : u)
+    )
+    showToast(`✅ ${name} has been unbanned`)
+  } catch (err) {
+    showToast('❌ Failed to unban user')
+  }
+}
 
   const handleResolveComplaint = async (id) => {
     try {
@@ -234,123 +251,159 @@ function AdminDashboard({ showToast }) {
               </div>
             </div>
 
-            {/* Row 1 */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '24px',
-              marginTop: '36px'
-            }}>
-              <ChartCard title="Bookings per Month">
-                <ResponsiveContainer width="100%" height={240}>
-                  <LineChart data={bookingsPerMonth}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                    <XAxis
-                      dataKey="month"
-                      tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
-                      axisLine={false} tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
-                      axisLine={false} tickLine={false}
-                    />
-                    <Tooltip contentStyle={tooltipStyle} />
-                    <Line
-                      type="monotone"
-                      dataKey="bookings"
-                      stroke="#c9a84c"
-                      strokeWidth={2.5}
-                      dot={{ fill: '#c9a84c', r: 3 }}
-                      activeDot={{ r: 5 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartCard>
 
-              <ChartCard title="Revenue per Month (DZD)">
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={revenuePerMonth} barSize={18}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                    <XAxis
-                      dataKey="month"
-                      tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
-                      axisLine={false} tickLine={false}
-                    />
-                    <YAxis
-                      tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
-                      axisLine={false} tickLine={false}
-                      tickFormatter={v => `${(v / 1000).toFixed(0)}k`}
-                    />
-                    <Tooltip
-                      contentStyle={tooltipStyle}
-                      formatter={v => [`${v.toLocaleString()} DZD`, 'Revenue']}
-                    />
-                    <Bar dataKey="revenue" fill="#c9a84c" radius={[6, 6, 0, 0]} />
-                  </BarChart> 
-                  
-                  
-                </ResponsiveContainer>
-              </ChartCard>
+          {/* Row 1 */}
+<div style={{
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '24px',
+  marginTop: '36px',
+  minWidth: 0,
+}}>
+  <ChartCard title="Bookings per Month">
+    <div style={{ width: '100%', height: 240, minWidth: 0 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={bookingsPerMonth}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+          <XAxis dataKey="month" tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }} axisLine={false} tickLine={false} />
+          <Tooltip contentStyle={tooltipStyle} />
+          <Line type="monotone" dataKey="bookings" stroke="#c9a84c" strokeWidth={2.5} dot={{ fill: '#c9a84c', r: 3 }} activeDot={{ r: 5 }} />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  </ChartCard>
+
+  <ChartCard title="Revenue per Month (DZD)">
+  <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: 200, paddingTop: 16 }}>
+    {(() => {
+      const max = Math.max(...revenuePerMonth.map(r => r.revenue), 1)
+      return revenuePerMonth.map((d, i) => {
+        const pct = (d.revenue / max) * 160  // pixel height, not percentage
+        return (
+          <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <div style={{ fontSize: 9, color: '#c9a84c', height: 14 }}>
+              {d.revenue > 0 ? `${(d.revenue/1000).toFixed(0)}k` : ''}
             </div>
-
-            {/* Row 2 */}
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '24px',
-              marginTop: '24px'
-            }}>
-              <ChartCard title="Listings by Wilaya">
-                <ResponsiveContainer width="100%" height={240}>
-                  <BarChart data={listingsByWilaya} layout="vertical" barSize={12}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
-                    <XAxis
-                      type="number"
-                      tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }}
-                      axisLine={false} tickLine={false}
-                    />
-                    <YAxis
-                      dataKey="wilaya"
-                      type="category"
-                      tick={{ fill: 'rgba(255,255,255,0.55)', fontSize: 11 }}
-                      axisLine={false} tickLine={false}
-                      width={85}
-                    />
-                    <Tooltip contentStyle={tooltipStyle} />
-                    <Bar dataKey="listings" fill="#c9a84c" radius={[0, 6, 6, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartCard>
+              width: '100%',
+              height: `${pct}px`,
+              minHeight: d.revenue > 0 ? 4 : 1,
+              background: d.revenue > 0 ? '#c9a84c' : 'rgba(255,255,255,0.08)',
+              borderRadius: '4px 4px 0 0',
+            }} />
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)' }}>{d.month}</div>
+          </div>
+        )
+      })
+    })()}
+  </div>
+</ChartCard>
+</div>
 
-              <ChartCard title="Booking Status">
-                <ResponsiveContainer width="100%" height={240}>
-                  <PieChart>
-                    <Pie
-                      data={bookingStatusData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="45%"
-                      outerRadius={75}
-                      innerRadius={38}
-                    >
-                      {bookingStatusData.map((_, i) => (
-                        <Cell key={i} fill={STATUS_COLORS[i % STATUS_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={tooltipStyle} />
-                    <Legend
-                      iconType="circle"
-                      iconSize={8}
-                      formatter={v => (
-                        <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: 12 }}>{v}</span>
-                      )}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </ChartCard>
+{/* Row 2 */}
+<div style={{
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '24px',
+  marginTop: '24px',
+  minWidth: 0,
+}}>
+  <ChartCard title="Listings by Wilaya">
+  <div style={{ width: '100%', height: Math.max(240, listingsByWilaya.length * 36), minWidth: 0 }}>
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={listingsByWilaya} layout="vertical" barSize={16} margin={{ left: 10, right: 20 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" horizontal={false} />
+        <XAxis type="number" tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }} axisLine={false} tickLine={false} />
+        <YAxis
+          dataKey="wilaya"
+          type="category"
+          tick={{ fill: 'rgba(255,255,255,0.65)', fontSize: 11 }}
+          axisLine={false}
+          tickLine={false}
+          width={120}
+        />
+        <Tooltip contentStyle={tooltipStyle} />
+        <Bar dataKey="listings" fill="#c9a84c" radius={[0, 6, 6, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</ChartCard>
+
+  <ChartCard title="Booking Status">
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32, paddingTop: 8 }}>
+    
+    {/* Donut */}
+    <div style={{ position: 'relative', width: 200, height: 200, flexShrink: 0 }}>
+      <svg width="200" height="200" viewBox="0 0 200 200">
+        {(() => {
+          const total = bookingStatusData.reduce((s, x) => s + x.value, 0) || 1
+          let offset = 0
+          const radius = 75
+          const circumference = 2 * Math.PI * radius
+          return bookingStatusData.map((d, i) => {
+            const pct = d.value / total
+            const dash = pct * circumference
+            const gap = circumference - dash
+            const rotation = offset * 360 - 90
+            offset += pct
+            return (
+              <circle
+                key={i}
+                cx="100" cy="100" r={radius}
+                fill="none"
+                stroke={STATUS_COLORS[i % STATUS_COLORS.length]}
+                strokeWidth="34"
+                strokeDasharray={`${dash} ${gap}`}
+                strokeDashoffset="0"
+                transform={`rotate(${rotation} 100 100)`}
+                style={{ transition: 'all 0.4s' }}
+              />
+            )
+          })
+        })()}
+      </svg>
+      {/* Center label */}
+      <div style={{
+        position: 'absolute', top: '50%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 26, fontWeight: 700, color: '#fff' }}>
+          {bookingStatusData.reduce((s, x) => s + x.value, 0)}
+        </div>
+        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.05em' }}>TOTAL</div>
+      </div>
+    </div>
+
+    {/* Legend */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {bookingStatusData.map((d, i) => {
+        const total = bookingStatusData.reduce((s, x) => s + x.value, 0) || 1
+        const pct = Math.round((d.value / total) * 100)
+        return (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 10, height: 10, borderRadius: '50%',
+              background: STATUS_COLORS[i % STATUS_COLORS.length],
+              flexShrink: 0,
+            }} />
+            <div>
+              <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13 }}>{d.name}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
+                <span style={{ color: '#c9a84c', fontSize: 12 }}>{d.value}</span>
+                <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>|</span>
+                <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>{pct}%</span>
+              </div>
             </div>
+          </div>
+        )
+      })}
+    </div>
 
+  </div>
+</ChartCard>
+</div>
           </div>
         )}
 
@@ -381,10 +434,52 @@ function AdminDashboard({ showToast }) {
                       <td>{u.role}</td>
                       <td>{new Date(u.created_at).toLocaleDateString()}</td>
                       <td>
-                        <button onClick={() => handleBanUser(u.user_id, u.full_name)}>
-                          Ban
-                        </button>
-                      </td>
+  {u.role === 'Admin' ? (
+    <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>—</span>
+  ) : u.is_banned ? (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{
+        color: '#ff6b6b',
+        fontSize: 11,
+        background: 'rgba(220,50,50,0.1)',
+        padding: '3px 8px',
+        borderRadius: '6px',
+        border: '1px solid rgba(220,50,50,0.3)',
+      }}>
+        Banned
+      </span>
+      <button
+        onClick={() => handleUnbanUser(u.user_id, u.full_name)}
+        style={{
+          background: 'rgba(100,200,100,0.1)',
+          border: '1px solid rgba(100,200,100,0.3)',
+          color: '#6fcf6f',
+          borderRadius: '6px',
+          padding: '3px 10px',
+          fontSize: '11px',
+          cursor: 'pointer',
+        }}
+      >
+        Unban
+      </button>
+    </div>
+  ) : (
+    <button
+      onClick={() => handleBanUser(u.user_id, u.full_name)}
+      style={{
+        background: 'rgba(220,50,50,0.15)',
+        border: '1px solid rgba(220,50,50,0.4)',
+        color: '#ff6b6b',
+        borderRadius: '6px',
+        padding: '4px 12px',
+        fontSize: '12px',
+        cursor: 'pointer',
+      }}
+    >
+      Ban 
+    </button>
+  )}
+</td>
                     </tr>
                   ))}
                 </tbody>
