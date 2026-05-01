@@ -19,6 +19,8 @@ import AboutPage from './pages/AboutPage';
 import AdminDashboard from './pages/AdminDashboard';
 import HostPropertyDetailPage from './pages/HostPropertyDetailPage';
 
+import AdminLogin     from './pages/AdminLogin'
+
 // In your App.jsx or router configuration
 import HostDashboard from './pages/HostDashboard';
 
@@ -30,6 +32,34 @@ function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
+}
+
+function AdminPage({ showToast }) {
+  const [admin, setAdmin] = useState(() => {
+    const stored = localStorage.getItem('admin')
+    return stored ? JSON.parse(stored) : null
+  })
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin')
+    setAdmin(null)
+  }
+
+  if (!admin) return <AdminLogin onLogin={setAdmin} />
+
+  return (
+    <>
+      <div style={{ position: 'fixed', top: 16, right: 24, zIndex: 999 }}>
+        <button
+          onClick={handleLogout}
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', borderRadius: 8, padding: '6px 14px', fontSize: 12, cursor: 'pointer' }}
+        >
+          Logout
+        </button>
+      </div>
+      <AdminDashboard showToast={showToast} />
+    </>
+  )
 }
 
 function AppInner() {
@@ -130,8 +160,7 @@ function AppInner() {
         <Route path="/host/dashboard" element={<HostDashboard showToast={showToast} />} />
         <Route path="/property/:id" element={<PropertyDetailPage showToast={showToast} onOpenBooking={openBooking} />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/adminDashboard" element={<AdminDashboard showToast={showToast} />} />
-        <Route path="/host/property/:id" element={<HostPropertyDetailPage showToast={showToast} />} />
+<Route path="/adminDashboard" element={<AdminPage showToast={showToast} />} />        <Route path="/host/property/:id" element={<HostPropertyDetailPage showToast={showToast} />} />
 
       </Routes>
 
@@ -144,6 +173,7 @@ function AppInner() {
   );
 }
 
+
 function App() {
   return (
     <BrowserRouter>
@@ -151,5 +181,8 @@ function App() {
     </BrowserRouter>
   );
 }
+
+
+
 
 export default App;

@@ -57,6 +57,12 @@ function AdminDashboard({ showToast }) {
   const [complaints,       setComplaints]        = useState([])
   const [transactions,     setTransactions]      = useState([])
 
+  const [hosts,          setHosts]          = useState([])
+const [selectedHost,   setSelectedHost]   = useState(null)
+const [hostModal,      setHostModal]      = useState(false)
+const [hostBookings,   setHostBookings]   = useState([])
+const [hostBookingsLoading, setHostBookingsLoading] = useState(false)
+
 
 
   useEffect(() => {
@@ -77,6 +83,7 @@ function AdminDashboard({ showToast }) {
           usersRes,
           complaintsRes,
           transactionsRes,
+           hostsRes,  
         ] = await Promise.all([
           fetch(`${API}/stats`),
           fetch(`${API}/bookings-per-month`),
@@ -86,6 +93,9 @@ function AdminDashboard({ showToast }) {
           fetch(`${API}/users`),
           fetch(`${API}/complaints`),
           fetch(`${API}/transactions`),
+          fetch(`${API}/hosts`),
+
+          
         ])
 
 
@@ -97,6 +107,9 @@ function AdminDashboard({ showToast }) {
         const usersData        = await usersRes.json()
         const complaintsData   = await complaintsRes.json()
         const transactionsData = await transactionsRes.json()
+        const hostsData = await hostsRes.json()
+console.log('hosts', hostsData)
+setHosts(Array.isArray(hostsData) ? hostsData : [])
 
         // Debug logs — check DevTools Console
         console.log('stats',        statsData)
@@ -124,7 +137,12 @@ function AdminDashboard({ showToast }) {
       //  setBookingStatusData(Array.isArray(statusData) ? statusData : []);
       //  console.log('Status state after set:', statusData);
         setUsers(            Array.isArray(usersData)        ? usersData        : [])
-        setComplaints(       Array.isArray(complaintsData)   ? complaintsData   : [])
+       const sorted = Array.isArray(complaintsData) ? complaintsData.sort((a, b) => {
+  const order = { open: 0, resolved: 1, dismissed: 2 }
+  return (order[a.status] ?? 1) - (order[b.status] ?? 1)
+}) : []
+
+setComplaints(sorted)
         setTransactions(     Array.isArray(transactionsData) ? transactionsData : [])
 
       } catch (err) {
@@ -138,13 +156,41 @@ function AdminDashboard({ showToast }) {
     fetchAll()
   }, [])
 
+
+
+  const handleVerifyHost = async (id, name) => {
+  try {
+    await fetch(`${API}/hosts/${id}/verify`, { method: 'PATCH' })
+    setHosts(prev => prev.map(h => h.host_id === id ? { ...h, is_verified: true } : h))
+    showToast(`✅ ${name} has been verified`)
+  } catch { showToast('❌ Failed to verify host') }
+}
+
+const handleUnverifyHost = async (id, name) => {
+  try {
+    await fetch(`${API}/hosts/${id}/unverify`, { method: 'PATCH' })
+    setHosts(prev => prev.map(h => h.host_id === id ? { ...h, is_verified: false } : h))
+    showToast(`⚠️ ${name} has been unverified`)
+  } catch { showToast('❌ Failed to unverify host') }
+}
+
+const openHostModal = async (host) => {
+  setSelectedHost(host)
+  setHostModal(true)
+  setHostBookingsLoading(true)
+  try {
+    const res = await fetch(`${API}/hosts/${host.host_id}/bookings`)
+    const data = await res.json()
+    setHostBookings(Array.isArray(data) ? data : [])
+  } catch { setHostBookings([]) }
+  finally { setHostBookingsLoading(false) }
+}
  
 const handleBanUser = async (id, name) => {
   try {
     await fetch(`${API}/users/${id}/ban`, { method: 'PATCH' })
-    setUsers(prev =>
-      prev.map(u => u.user_id === id ? { ...u, is_banned: true } : u)
-    )
+    setUsers(prev => prev.map(u => u.user_id === id ? { ...u, is_banned: true } : u))
+    setHosts(prev => prev.map(h => h.host_id === id ? { ...h, is_banned: true } : h))  // ← add
     showToast(`🚫 ${name} has been banned`)
   } catch (err) {
     showToast('❌ Failed to ban user')
@@ -154,15 +200,24 @@ const handleBanUser = async (id, name) => {
 const handleUnbanUser = async (id, name) => {
   try {
     await fetch(`${API}/users/${id}/unban`, { method: 'PATCH' })
-    setUsers(prev =>
-      prev.map(u => u.user_id === id ? { ...u, is_banned: false } : u)
-    )
+    setUsers(prev => prev.map(u => u.user_id === id ? { ...u, is_banned: false } : u))
+    setHosts(prev => prev.map(h => h.host_id === id ? { ...h, is_banned: false } : h))  // ← add
     showToast(`✅ ${name} has been unbanned`)
   } catch (err) {
     showToast('❌ Failed to unban user')
   }
 }
 
+const handleDeleteUser = async (id, name) => {
+  try {
+    await fetch(`${API}/users/${id}`, { method: 'DELETE' })
+    setUsers(prev => prev.filter(u => u.user_id !== id))
+    setHosts(prev => prev.filter(h => h.host_id !== id))
+    showToast(`🗑️ ${name}'s account has been deleted`)
+  } catch (err) {
+    showToast('❌ Failed to delete account')
+  }
+}
   const handleResolveComplaint = async (id) => {
     try {
       await fetch(`${API}/complaints/${id}/resolve`, { method: 'PATCH' })
@@ -175,6 +230,18 @@ const handleUnbanUser = async (id, name) => {
       showToast('❌ Failed to resolve complaint')
     }
   }
+
+  const handleDismissComplaint = async (id) => {
+  try {
+    await fetch(`${API}/complaints/${id}/dismiss`, { method: 'PATCH' })
+    setComplaints(prev =>
+      prev.map(c => c.complaint_id === id ? { ...c, status: 'dismissed' } : c)
+    )
+    showToast('🚫 Complaint dismissed')
+  } catch (err) {
+    showToast('❌ Failed to dismiss complaint')
+  }
+}
 
   // ── Loading state ──
   if (loading) return (
@@ -218,6 +285,7 @@ const handleUnbanUser = async (id, name) => {
           ['users',        'Users'],
           ['complaints',   'Complaints'],
           ['transactions', 'Transactions'],
+           ['accounts',     'Accounts'],     
         ].map(([key, label]) => (
           <button
             key={key}
@@ -433,53 +501,29 @@ const handleUnbanUser = async (id, name) => {
                       <td>{u.wilaya}</td>
                       <td>{u.role}</td>
                       <td>{new Date(u.created_at).toLocaleDateString()}</td>
-                      <td>
+                    <td>
   {u.role === 'Admin' ? (
     <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>—</span>
-  ) : u.is_banned ? (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{
-        color: '#ff6b6b',
-        fontSize: 11,
-        background: 'rgba(220,50,50,0.1)',
-        padding: '3px 8px',
-        borderRadius: '6px',
-        border: '1px solid rgba(220,50,50,0.3)',
-      }}>
-        Banned
-      </span>
+  ) : (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      {u.is_banned ? (
+        <>
+          <span style={{ color: '#ff6b6b', fontSize: 11, background: 'rgba(220,50,50,0.1)', padding: '3px 8px', borderRadius: '6px', border: '1px solid rgba(220,50,50,0.3)' }}>Banned</span>
+          <button onClick={() => handleUnbanUser(u.user_id, u.full_name)} style={{ background: 'rgba(100,200,100,0.1)', border: '1px solid rgba(100,200,100,0.3)', color: '#6fcf6f', borderRadius: '6px', padding: '3px 10px', fontSize: '11px', cursor: 'pointer' }}>Unban</button>
+        </>
+      ) : (
+        <button onClick={() => handleBanUser(u.user_id, u.full_name)} style={{ background: 'rgba(220,50,50,0.15)', border: '1px solid rgba(220,50,50,0.4)', color: '#ff6b6b', borderRadius: '6px', padding: '4px 12px', fontSize: '12px', cursor: 'pointer' }}>Ban</button>
+      )}
       <button
-        onClick={() => handleUnbanUser(u.user_id, u.full_name)}
-        style={{
-          background: 'rgba(100,200,100,0.1)',
-          border: '1px solid rgba(100,200,100,0.3)',
-          color: '#6fcf6f',
-          borderRadius: '6px',
-          padding: '3px 10px',
-          fontSize: '11px',
-          cursor: 'pointer',
-        }}
+        onClick={() => { if (window.confirm(`Delete ${u.full_name}'s account permanently?`)) handleDeleteUser(u.user_id, u.full_name) }}
+        style={{ background: 'rgba(150,0,0,0.2)', border: '1px solid rgba(200,0,0,0.4)', color: '#ff4444', borderRadius: '6px', padding: '4px 12px', fontSize: '12px', cursor: 'pointer' }}
       >
-        Unban
+        Delete
       </button>
     </div>
-  ) : (
-    <button
-      onClick={() => handleBanUser(u.user_id, u.full_name)}
-      style={{
-        background: 'rgba(220,50,50,0.15)',
-        border: '1px solid rgba(220,50,50,0.4)',
-        color: '#ff6b6b',
-        borderRadius: '6px',
-        padding: '4px 12px',
-        fontSize: '12px',
-        cursor: 'pointer',
-      }}
-    >
-      Ban 
-    </button>
   )}
 </td>
+
                     </tr>
                   ))}
                 </tbody>
@@ -515,13 +559,19 @@ const handleUnbanUser = async (id, name) => {
                       <td>{c.description}</td>
                       <td>{c.status}</td>
                       <td>{new Date(c.created_at).toLocaleDateString()}</td>
-                      <td>
-                        {c.status !== 'resolved' && (
-                          <button onClick={() => handleResolveComplaint(c.complaint_id)}>
-                            Resolve
-                          </button>
-                        )}
-                      </td>
+                     <td>
+  {c.status !== 'resolved' && c.status !== 'dismissed' && (
+    <div style={{ display: 'flex', gap: 8 }}>
+      <button onClick={() => handleResolveComplaint(c.complaint_id)}>
+        Resolve
+      </button>
+      <button onClick={() => handleDismissComplaint(c.complaint_id)}>
+        Dismiss
+      </button>
+    </div>
+  )}
+</td>
+                      
                     </tr>
                   ))}
                 </tbody>
@@ -565,7 +615,161 @@ const handleUnbanUser = async (id, name) => {
           </div>
         )}
 
+        {/* ── ACCOUNTS ── */}
+{activeTab === 'accounts' && (
+  <div className="admin-users">
+    <h2>Host Accounts</h2>
+
+    {/* Summary cards */}
+    <div style={{ display: 'flex', gap: 16, marginBottom: 28 }}>
+      {[
+        { label: 'Total Hosts',    value: hosts.length },
+        { label: 'Verified',       value: hosts.filter(h => h.is_verified).length },
+        { label: 'Pending',        value: hosts.filter(h => !h.is_verified && !h.is_banned).length },
+        { label: 'Banned',         value: hosts.filter(h => h.is_banned).length },
+      ].map(({ label, value }) => (
+        <div key={label} style={{ background: '#13213a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '16px 24px', flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 26, fontWeight: 700, color: '#c9a84c' }}>{value}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
+        </div>
+      ))}
+    </div>
+
+    {hosts.length === 0 ? (
+      <p style={{ color: 'rgba(255,255,255,0.4)' }}>No hosts found.</p>
+    ) : (
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Wilaya</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {hosts.map(h => (
+            <tr key={h.host_id}>
+              <td>{h.full_name}</td>
+              <td>{h.email}</td>
+              <td>{h.wilaya || '—'}</td>
+              <td>{new Date(h.created_at).toLocaleDateString()}</td>
+              <td>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  {h.is_verified && (
+                    <span style={{ background: 'rgba(100,200,100,0.1)', border: '1px solid rgba(100,200,100,0.3)', color: '#6fcf6f', borderRadius: 6, padding: '2px 8px', fontSize: 11 }}>✓ Verified</span>
+                  )}
+                  {h.is_banned && (
+                    <span style={{ background: 'rgba(220,50,50,0.1)', border: '1px solid rgba(220,50,50,0.3)', color: '#ff6b6b', borderRadius: 6, padding: '2px 8px', fontSize: 11 }}>Banned</span>
+                  )}
+                  {!h.is_verified && !h.is_banned && (
+                    <span style={{ background: 'rgba(255,200,50,0.1)', border: '1px solid rgba(255,200,50,0.3)', color: '#ffc832', borderRadius: 6, padding: '2px 8px', fontSize: 11 }}>Pending</span>
+                  )}
+                </div>
+              </td>
+              <td>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {!h.is_verified ? (
+                    <button
+                      onClick={() => handleVerifyHost(h.host_id, h.full_name)}
+                      style={{ background: 'rgba(100,200,100,0.1)', border: '1px solid rgba(100,200,100,0.3)', color: '#6fcf6f', borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}
+                    >
+                      Approve
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleUnverifyHost(h.host_id, h.full_name)}
+                      style={{ background: 'rgba(255,200,50,0.1)', border: '1px solid rgba(255,200,50,0.3)', color: '#ffc832', borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}
+                    >
+                      Revoke
+                    </button>
+                  )}
+                  <button
+                    onClick={() => openHostModal(h)}
+                    style={{ background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.4)', color: '#c9a84c', borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer' }}
+                  >
+                    Details
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </div>
+)}
+
       </div>
+
+      {/* ── HOST DETAILS MODAL ── */}
+{hostModal && selectedHost && (
+  <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+    <div style={{ background: '#0d1b2e', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 20, padding: 32, width: '100%', maxWidth: 640, maxHeight: '85vh', overflowY: 'auto' }}>
+
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+        <div>
+          <div style={{ color: '#c9a84c', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 4 }}>Host Details</div>
+          <div style={{ color: '#fff', fontSize: 20, fontWeight: 700 }}>{selectedHost.full_name}</div>
+          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 2 }}>{selectedHost.email}</div>
+        </div>
+        <button onClick={() => { setHostModal(false); setSelectedHost(null) }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: 22, cursor: 'pointer' }}>✕</button>
+      </div>
+
+      {/* Info Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
+        {[
+          { label: 'Wilaya',   value: selectedHost.wilaya   || '—' },
+          { label: 'Phone',    value: selectedHost.num_tele || '—' },
+          { label: 'Joined',   value: new Date(selectedHost.created_at).toLocaleDateString() },
+          { label: 'Verified', value: selectedHost.is_verified ? '✓ Yes' : 'No' },
+        ].map(({ label, value }) => (
+          <div key={label} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '12px 16px' }}>
+            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
+            <div style={{ color: '#fff', fontSize: 13 }}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Booking History */}
+      <div>
+        <div style={{ color: '#c9a84c', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 14 }}>
+          Bookings on their Properties
+        </div>
+        {hostBookingsLoading ? (
+          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>Loading...</div>
+        ) : hostBookings.length === 0 ? (
+          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>No bookings found.</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {hostBookings.map(b => (
+              <div key={b.booking_id} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '12px 16px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{b.property_title}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 3 }}>
+                      Guest: {b.guest_name} · {b.arrival} → {b.departure}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ color: '#c9a84c', fontSize: 13 }}>{b.total_price?.toLocaleString()} DZD</div>
+                    <div style={{ fontSize: 11, marginTop: 3, color: b.status === 'confirmed' ? '#6fcf6f' : b.status === 'cancelled' ? '#ff6b6b' : 'rgba(255,255,255,0.4)' }}>
+                      {b.status}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+    </div>
+  </div>
+)}
     </section>
   );
 }
