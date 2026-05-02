@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 
 const API = 'http://localhost:5000/api/admin'
 
+
+
+
 function AdminLogin({ onLogin }) {
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
@@ -20,7 +23,9 @@ function AdminLogin({ onLogin }) {
       })
       const data = await res.json()
       if (!res.ok) return setError(data.error)
-      localStorage.setItem('admin', JSON.stringify(data.admin))
+  //    localStorage.setItem('admin', JSON.stringify(data.admin))
+   sessionStorage.setItem('admin', JSON.stringify(data.admin))
+
       onLogin(data.admin)
     } catch {
       setError('Failed to connect to server')

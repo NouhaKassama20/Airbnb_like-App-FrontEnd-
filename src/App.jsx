@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import './App.css';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -19,10 +19,17 @@ import AboutPage from './pages/AboutPage';
 import AdminDashboard from './pages/AdminDashboard';
 import HostPropertyDetailPage from './pages/HostPropertyDetailPage';
 
+
 import AdminLogin     from './pages/AdminLogin'
 
 // In your App.jsx or router configuration
 import HostDashboard from './pages/HostDashboard';
+
+import GuestPage from './pages/GuestPage'
+import GuestProfile from './pages/GuestProfile'
+
+
+
 
 
 
@@ -36,12 +43,22 @@ function ScrollToTop() {
 
 function AdminPage({ showToast }) {
   const [admin, setAdmin] = useState(() => {
-    const stored = localStorage.getItem('admin')
+  //  const stored = localStorage.getItem('admin')
+  const stored = sessionStorage.getItem('admin')
+
     return stored ? JSON.parse(stored) : null
   })
 
+  useEffect(() => {
+    return () => {
+      sessionStorage.removeItem('admin')
+    }
+  }, [])
+
   const handleLogout = () => {
-    localStorage.removeItem('admin')
+   // localStorage.removeItem('admin')
+   sessionStorage.removeItem('admin')
+
     setAdmin(null)
   }
 
@@ -61,6 +78,7 @@ function AdminPage({ showToast }) {
     </>
   )
 }
+
 
 function AppInner() {
   const location = useLocation();
@@ -92,7 +110,7 @@ function AppInner() {
 
   const openModal = () => setModalOpen(true);
   const closeModal = () => setModalOpen(false);
-  const handleAuth = () => { closeModal(); setTimeout(() => showToast('✨ Welcome to NestAway!'), 300); };
+const handleAuth = () => { closeModal(); setTimeout(() => showToast('✨ Welcome to Mabiti\'i!'), 300); };
 
   // Scroll listener
   useEffect(() => {
@@ -160,7 +178,9 @@ function AppInner() {
         <Route path="/host/dashboard" element={<HostDashboard showToast={showToast} />} />
         <Route path="/property/:id" element={<PropertyDetailPage showToast={showToast} onOpenBooking={openBooking} />} />
         <Route path="/about" element={<AboutPage />} />
-<Route path="/adminDashboard" element={<AdminPage showToast={showToast} />} />        <Route path="/host/property/:id" element={<HostPropertyDetailPage showToast={showToast} />} />
+     <Route path="/adminDashboard" element={<AdminDashboard showToast={showToast} />} />
+  <Route path="/guest" element={<GuestPage />} />
+    <Route path="/profile" element={<GuestProfile />} />
 
       </Routes>
 
