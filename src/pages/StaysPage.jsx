@@ -1,7 +1,58 @@
 // src/pages/StaysPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchProperties } from '../services/propertiesApi';
+
+const ALL_WILAYAS = [
+  { name: 'Adrar', emoji: '🏜️' },
+  { name: 'Chlef', emoji: '🌾' },
+  { name: 'Laghouat', emoji: '🏜️' },
+  { name: 'Oum El Bouaghi', emoji: '🏞️' },
+  { name: 'Batna', emoji: '🏛️' },
+  { name: 'Béjaïa', emoji: '🏖️' },
+  { name: 'Biskra', emoji: '🌴' },
+  { name: 'Béchar', emoji: '🏜️' },
+  { name: 'Blida', emoji: '🌳' },
+  { name: 'Bouira', emoji: '⛰️' },
+  { name: 'Tamanrasset', emoji: '🏔️' },
+  { name: 'Tébessa', emoji: '🏛️' },
+  { name: 'Tlemcen', emoji: '🕌' },
+  { name: 'Tiaret', emoji: '🏞️' },
+  { name: 'Tizi Ouzou', emoji: '⛰️' },
+  { name: 'Alger', emoji: '🌆' },
+  { name: 'Djelfa', emoji: '🏜️' },
+  { name: 'Jijel', emoji: '🏖️' },
+  { name: 'Sétif', emoji: '🏔️' },
+  { name: 'Saïda', emoji: '🌾' },
+  { name: 'Skikda', emoji: '🏖️' },
+  { name: 'Sidi Bel Abbès', emoji: '🌾' },
+  { name: 'Annaba', emoji: '🏖️' },
+  { name: 'Guelma', emoji: '🌳' },
+  { name: 'Constantine', emoji: '🏛️' },
+  { name: 'Médéa', emoji: '⛰️' },
+  { name: 'Mostaganem', emoji: '🏖️' },
+  { name: 'M\'Sila', emoji: '🏜️' },
+  { name: 'Mascara', emoji: '🌾' },
+  { name: 'Ouargla', emoji: '🏜️' },
+  { name: 'Oran', emoji: '🗼' },
+  { name: 'El Bayadh', emoji: '🏜️' },
+  { name: 'Illizi', emoji: '🏔️' },
+  { name: 'Bordj Bou Arréridj', emoji: '🏞️' },
+  { name: 'Boumerdès', emoji: '🏖️' },
+  { name: 'El Tarf', emoji: '🌳' },
+  { name: 'Tindouf', emoji: '🏜️' },
+  { name: 'Tissemsilt', emoji: '⛰️' },
+  { name: 'El Oued', emoji: '🏜️' },
+  { name: 'Khenchela', emoji: '🏔️' },
+  { name: 'Souk Ahras', emoji: '🏛️' },
+  { name: 'Tipaza', emoji: '🏛️' },
+  { name: 'Mila', emoji: '🌾' },
+  { name: 'Aïn Defla', emoji: '🌳' },
+  { name: 'Naâma', emoji: '🏜️' },
+  { name: 'Aïn Témouchent', emoji: '🏖️' },
+  { name: 'Ghardaïa', emoji: '🏛️' },
+  { name: 'Relizane', emoji: '🌾' },
+];
 
 function StaysPage({ showToast, onOpenBooking }) {
   const navigate = useNavigate();
@@ -9,7 +60,7 @@ function StaysPage({ showToast, onOpenBooking }) {
   const [allListings, setAllListings] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [loading, setLoading] = useState(true);
-  
+
   // Search state
   const [searchDestination, setSearchDestination] = useState('');
   const [checkInDate, setCheckInDate] = useState('');
@@ -19,36 +70,89 @@ function StaysPage({ showToast, onOpenBooking }) {
   const [rentalType, setRentalType] = useState('day');
   const [searchPerformed, setSearchPerformed] = useState(false);
 
-  // Calculate number of days between two dates
+  // Wilaya autocomplete state
+  const [showWilayaDropdown, setShowWilayaDropdown] = useState(false);
+  const [wilayaSuggestions, setWilayaSuggestions] = useState([]);
+  const [highlightedWilaya, setHighlightedWilaya] = useState(-1);
+  const destinationRef = useRef(null);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        destinationRef.current && !destinationRef.current.contains(e.target) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target)
+      ) {
+        setShowWilayaDropdown(false);
+        setHighlightedWilaya(-1);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter wilaya suggestions as user types
+  const handleDestinationChange = (e) => {
+    const val = e.target.value;
+    setSearchDestination(val);
+    if (val.trim() === '') {
+      setWilayaSuggestions([]);
+      setShowWilayaDropdown(false);
+      setHighlightedWilaya(-1);
+    } else {
+      const matches = ALL_WILAYAS.filter(w =>
+        w.name.toLowerCase().includes(val.toLowerCase())
+      );
+      setWilayaSuggestions(matches);
+      setShowWilayaDropdown(matches.length > 0);
+      setHighlightedWilaya(-1);
+    }
+  };
+
+  const handleWilayaSelect = (wilayaName) => {
+    setSearchDestination(wilayaName);
+    setShowWilayaDropdown(false);
+    setHighlightedWilaya(-1);
+  };
+
+  const handleDestinationKeyDown = (e) => {
+    if (!showWilayaDropdown || wilayaSuggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setHighlightedWilaya(prev => (prev < wilayaSuggestions.length - 1 ? prev + 1 : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setHighlightedWilaya(prev => (prev > 0 ? prev - 1 : wilayaSuggestions.length - 1));
+    } else if (e.key === 'Enter' && highlightedWilaya >= 0) {
+      e.preventDefault();
+      handleWilayaSelect(wilayaSuggestions[highlightedWilaya].name);
+    } else if (e.key === 'Escape') {
+      setShowWilayaDropdown(false);
+      setHighlightedWilaya(-1);
+    }
+  };
+
   const calculateDays = (checkIn, checkOut) => {
     if (!checkIn || !checkOut) return 0;
     const start = new Date(checkIn);
     const end = new Date(checkOut);
     const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   };
 
-  // Determine rental type based on number of days
   const getRentalTypeForDuration = (days) => {
-  if (days < 30) {
-    return 'day';  // 1-30 days: per night pricing
-  } else if (days < 365) {
-    return 'month';  // 31-365 days: per month pricing
-  } else {
-    return 'year';  // 366+ days: per year pricing
-  }
-};
+    if (days < 30) return 'day';
+    if (days < 365) return 'month';
+    return 'year';
+  };
 
-
-  // Format price
   const formatPrice = (price, rentalType) => {
     const dzdPrice = Math.round(price * 240);
     const period = rentalType === 'day' ? 'night' : rentalType === 'month' ? 'month' : 'year';
     return `${dzdPrice.toLocaleString('fr-DZ')} DA / ${period}`;
   };
 
-  // Get first image
   const getFirstImage = (property) => {
     if (!property.img) return 'https://picsum.photos/id/104/600/450';
     if (Array.isArray(property.img) && property.img.length > 0) return property.img[0];
@@ -56,89 +160,44 @@ function StaysPage({ showToast, onOpenBooking }) {
     return 'https://picsum.photos/id/104/600/450';
   };
 
-  // Apply all filters
-  const applyFilters = (destination, guests, days, rentType, category) => {
-    let filtered = [...allListings];
-    
-    // Filter by destination (wilaya or location)
-    if (destination && destination.trim() !== '') {
-      filtered = filtered.filter(property => 
-        property.wilaya?.toLowerCase().includes(destination.toLowerCase()) ||
-        property.location?.toLowerCase().includes(destination.toLowerCase())
-      );
-    }
-    
-    // Filter by guest count
-    if (guests && guests > 0) {
-      filtered = filtered.filter(property => 
-        property.voyageurs && property.voyageurs >= guests
-      );
-    }
-    
-    // Filter by rental type
-    if (rentType && days > 0) {
-      filtered = filtered.filter(property => 
-        property.rental_type === rentType
-      );
-    }
-    
-    // Filter by category
-    if (category !== 'all') {
-      filtered = filtered.filter(property => property.category === category);
-    }
-    
-    return filtered;
-  };
-
-  // Perform search with current values
   const performSearch = () => {
-    if (allListings.length === 0) {
-      return;
-    }
-    
+    if (allListings.length === 0) return;
     const dest = searchDestination;
-    const checkIn = checkInDate;
-    const checkOut = checkOutDate;
     const guests = guestCount ? parseInt(guestCount) : 0;
-    
+
     if (!dest) {
       showToast('📍 Please enter a destination');
       return;
     }
-    
-    if (!checkIn || !checkOut) {
-      showToast('📅 Please select both check-in and check-out dates');
-      return;
+
+    if (checkInDate && checkOutDate) {
+      const days = calculateDays(checkInDate, checkOutDate);
+      if (days < 1) { showToast('❌ Check-out date must be after check-in date'); return; }
+      if (days > 365) { showToast('⚠️ Maximum stay is 365 days'); return; }
+      setNumberOfDays(days);
+      setRentalType(getRentalTypeForDuration(days));
     }
-    
-    const days = calculateDays(checkIn, checkOut);
-    
-    if (days < 1) {
-      showToast('❌ Check-out date must be after check-in date');
-      return;
-    }
-    
-    if (days > 365) {
-      showToast('⚠️ Maximum stay is 365 days');
-      return;
-    }
-    
-    const rentType = getRentalTypeForDuration(days);
-    setNumberOfDays(days);
-    setRentalType(rentType);
-    
-    const filtered = applyFilters(dest, guests, days, rentType, activeCategory);
+
+    const filtered = allListings.filter(property => {
+      let matches = true;
+      if (dest.trim() !== '') {
+        matches = matches && (
+          property.wilaya?.toLowerCase().includes(dest.toLowerCase()) ||
+          property.location?.toLowerCase().includes(dest.toLowerCase())
+        );
+      }
+      if (guests > 0) matches = matches && (property.voyageurs && property.voyageurs >= guests);
+      if (activeCategory !== 'all') matches = matches && (property.category === activeCategory);
+      return matches;
+    });
+
     setListings(filtered);
     setSearchPerformed(true);
-    
-    if (filtered.length === 0) {
-      showToast(`No properties found in ${dest} for ${days} days`);
-    } else {
-      showToast(`✨ Found ${filtered.length} properties in ${dest}`);
-    }
+    filtered.length === 0
+      ? showToast(`No properties found in ${dest}`)
+      : showToast(`✨ Found ${filtered.length} properties in ${dest}`);
   };
 
-  // Clear all filters
   const clearSearch = () => {
     setSearchDestination('');
     setCheckInDate('');
@@ -148,52 +207,41 @@ function StaysPage({ showToast, onOpenBooking }) {
     setRentalType('day');
     setSearchPerformed(false);
     setListings(allListings);
+    setShowWilayaDropdown(false);
     showToast('✨ All filters cleared');
   };
 
-  // Check for saved search params on load
   useEffect(() => {
-    const savedParams = localStorage.getItem('searchParams');
-    
+    const selectedWilaya = localStorage.getItem('selectedWilaya');
     fetchProperties()
       .then(data => {
         setAllListings(data);
         setListings(data);
         setLoading(false);
-        
-        if (savedParams) {
-          const params = JSON.parse(savedParams);
-          
-          setSearchDestination(params.destination || '');
-          setCheckInDate(params.checkIn || '');
-          setCheckOutDate(params.checkOut || '');
-          setGuestCount(params.guests ? params.guests.toString() : '');
-          
-          const days = calculateDays(params.checkIn, params.checkOut);
-          const rentType = getRentalTypeForDuration(days);
-          setNumberOfDays(days);
-          setRentalType(rentType);
-          
-          setTimeout(() => {
-            const filtered = applyFilters(
-              params.destination, 
-              params.guests || 0, 
-              days, 
-              rentType, 
-              'all'
-            );
-            setListings(filtered);
-            setSearchPerformed(true);
-            
-            if (filtered.length === 0) {
-              showToast(`No properties found in ${params.destination} for ${days} days`);
-            } else {
-              showToast(`✨ Found ${filtered.length} properties in ${params.destination}`);
+        if (selectedWilaya) {
+          try {
+            const { name, fromDestinationsPage } = JSON.parse(selectedWilaya);
+            if (fromDestinationsPage && name) {
+              const filteredByWilaya = data.filter(property => {
+                const propertyWilaya = property.wilaya?.toLowerCase() || '';
+                const propertyLocation = property.location?.toLowerCase() || '';
+                const searchName = name.toLowerCase();
+                return propertyWilaya.includes(searchName) || propertyLocation.includes(searchName);
+              });
+              setSearchDestination(name);
+              setSearchPerformed(true);
+              setListings(filteredByWilaya);
+              filteredByWilaya.length === 0
+                ? showToast(`📍 No properties found in ${name}`)
+                : showToast(`📍 Showing ${filteredByWilaya.length} properties in ${name}`);
+              localStorage.removeItem('selectedWilaya');
+              return;
             }
-          }, 100);
-          
-          localStorage.removeItem('searchParams');
+          } catch (err) {
+            console.error('Error parsing selectedWilaya:', err);
+          }
         }
+        setListings(data);
       })
       .catch((err) => {
         console.error('Error fetching properties:', err);
@@ -202,40 +250,27 @@ function StaysPage({ showToast, onOpenBooking }) {
       });
   }, []);
 
-  // Filter by category
   const filterCategory = (category) => {
     setActiveCategory(category);
-    
     if (searchPerformed) {
       const guests = guestCount ? parseInt(guestCount) : 0;
       const filtered = allListings.filter(property => {
         let matches = true;
-        
-        if (searchDestination && searchDestination.trim() !== '') {
-          matches = matches && (property.wilaya?.toLowerCase().includes(searchDestination.toLowerCase()) ||
-            property.location?.toLowerCase().includes(searchDestination.toLowerCase()));
+        if (searchDestination.trim() !== '') {
+          matches = matches && (
+            property.wilaya?.toLowerCase().includes(searchDestination.toLowerCase()) ||
+            property.location?.toLowerCase().includes(searchDestination.toLowerCase())
+          );
         }
-        
-        if (guests > 0) {
-          matches = matches && (property.voyageurs && property.voyageurs >= guests);
-        }
-        
-        if (numberOfDays > 0) {
-          matches = matches && (property.rental_type === rentalType);
-        }
-        
-        if (category !== 'all') {
-          matches = matches && (property.category === category);
-        }
-        
+        if (guests > 0) matches = matches && (property.voyageurs && property.voyageurs >= guests);
+        if (numberOfDays > 0) matches = matches && (property.rental_type === rentalType);
+        if (category !== 'all') matches = matches && (property.category === category);
         return matches;
       });
       setListings(filtered);
       showToast(`✦ Showing ${filtered.length} stays`);
     } else {
-      const filtered = category === 'all'
-        ? allListings
-        : allListings.filter(l => l.category === category);
+      const filtered = category === 'all' ? allListings : allListings.filter(l => l.category === category);
       setListings(filtered);
       showToast(`✦ Showing ${filtered.length} stays`);
     }
@@ -247,10 +282,7 @@ function StaysPage({ showToast, onOpenBooking }) {
     const isLiked = btn.classList.toggle('liked');
     btn.innerHTML = isLiked ? '♥' : `
       <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-        <path
-          d="M16 28C16 28 4 20 4 12C4 8.686 6.686 6 10 6C12.2 6 14.1 7.2 16 9.2C17.9 7.2 19.8 6 22 6C25.314 6 28 8.686 28 12C28 20 16 28 16 28Z"
-          stroke="white" strokeWidth="2.5" fill="rgba(0,0,0,0.25)"
-        />
+        <path d="M16 28C16 28 4 20 4 12C4 8.686 6.686 6 10 6C12.2 6 14.1 7.2 16 9.2C17.9 7.2 19.8 6 22 6C25.314 6 28 8.686 28 12C28 20 16 28 16 28Z" stroke="white" strokeWidth="2.5" fill="rgba(0,0,0,0.25)"/>
       </svg>
     `;
     btn.style.color = isLiked ? '#e63946' : '';
@@ -261,15 +293,11 @@ function StaysPage({ showToast, onOpenBooking }) {
 
   return (
     <>
-      {/* Page Hero with Airbnb Style Search Bar */}
-      <div style={{
-        background: 'white',
-        borderBottom: '1px solid #e0e0e0',
-        paddingTop: '100px',
-        paddingBottom: '30px'
-      }}>
+      {/* Page Hero with Search Bar */}
+      <div style={{ background: 'white', borderBottom: '1px solid #e0e0e0', paddingTop: '100px', paddingBottom: '30px' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 40px' }}>
-          {/* Airbnb Style Search Bar */}
+
+          {/* Search Bar */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -277,174 +305,189 @@ function StaysPage({ showToast, onOpenBooking }) {
             borderRadius: '48px',
             border: '1px solid #e0e0e0',
             boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            overflow: 'hidden',
-            transition: 'box-shadow 0.2s ease',
+            overflow: 'visible',
             maxWidth: '900px',
-            margin: '0 auto'
+            margin: '0 auto',
+            position: 'relative',
+            zIndex: 50,
           }}>
-            
-           {/* Destination Field */}
-<div style={{ 
-  flex: 1.5, 
-  padding: '14px 20px',
-  cursor: 'pointer',
-  borderRight: '1px solid #e0e0e0'
-}}>
-  <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>
-    Where
-  </div>
-  <input
-    type="text"
-    placeholder="Search destinations"
-    value={searchDestination}
-    onChange={(e) => setSearchDestination(e.target.value)}
-    style={{
-      width: '100%',
-      border: 'none',
-      outline: 'none',
-      fontSize: '14px',
-      background: 'transparent',
-      fontFamily: 'inherit',
-      color: '#333333'  // ← ADD THIS - dark text color
-    }}
-  />
-</div>
 
-{/* Check In Field */}
-<div style={{ 
-  flex: 1, 
-  padding: '14px 20px',
-  cursor: 'pointer',
-  borderRight: '1px solid #e0e0e0'
-}}>
-  <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>
-    Check in
-  </div>
-  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-    <input
-      type="date"
-      value={checkInDate}
-      onChange={(e) => setCheckInDate(e.target.value)}
-      min={new Date().toISOString().split('T')[0]}
-      style={{
-        width: '100%',
-        border: 'none',
-        outline: 'none',
-        fontSize: '14px',
-        background: 'transparent',
-        fontFamily: 'inherit',
-        color: '#333333',
-        opacity: checkInDate ? 1 : 0,
-        cursor: 'pointer'
-      }}
-    />
-    {!checkInDate && (
-      <span style={{
-        position: 'absolute',
-        left: 0,
-        color: '#999',
-        fontSize: '14px',
-        pointerEvents: 'none'
-      }}>
-        Add date
-      </span>
-    )}
-    <svg 
-      style={{
-        position: 'absolute',
-        right: 0,
-        width: '18px',
-        height: '18px',
-        color: '#999',
-        pointerEvents: 'none'
-      }}
-      fill="none" 
-      stroke="currentColor" 
-      viewBox="0 0 24 24"
-    >
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2"/>
-      <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"/>
-      <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"/>
-      <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"/>
-    </svg>
-  </div>
-</div>
+            {/* Destination Field */}
+            <div
+              ref={destinationRef}
+              style={{ flex: 1.5, padding: '14px 20px', borderRight: '1px solid #e0e0e0', position: 'relative' }}
+            >
+              <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Where</div>
+              <input
+                type="text"
+                placeholder="Search destinations"
+                value={searchDestination}
+                onChange={handleDestinationChange}
+                onKeyDown={handleDestinationKeyDown}
+                onFocus={() => {
+                  if (wilayaSuggestions.length > 0) setShowWilayaDropdown(true);
+                }}
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  fontSize: '14px',
+                  background: 'transparent',
+                  fontFamily: 'inherit',
+                  color: '#333',
+                }}
+              />
 
-{/* Check Out Field */}
-<div style={{ 
-  flex: 1, 
-  padding: '14px 20px',
-  cursor: 'pointer',
-  borderRight: '1px solid #e0e0e0'
-}}>
-  <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>
-    Check out
-  </div>
-  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-    <input
-      type="date"
-      value={checkOutDate}
-      onChange={(e) => setCheckOutDate(e.target.value)}
-      min={checkInDate || new Date().toISOString().split('T')[0]}
-      style={{
-        width: '100%',
-        border: 'none',
-        outline: 'none',
-        fontSize: '14px',
-        background: 'transparent',
-        fontFamily: 'inherit',
-        color: '#333333',
-        opacity: checkOutDate ? 1 : 0,
-        cursor: 'pointer'
-      }}
-    />
-    {!checkOutDate && (
-      <span style={{
-        position: 'absolute',
-        left: 0,
-        color: '#999',
-        fontSize: '14px',
-        pointerEvents: 'none'
-      }}>
-        Add date
-      </span>
-    )}
-    <svg 
-      style={{
-        position: 'absolute',
-        right: 0,
-        width: '18px',
-        height: '18px',
-        color: '#999',
-        pointerEvents: 'none'
-      }}
-      fill="none" 
-      stroke="currentColor" 
-      viewBox="0 0 24 24"
-    >
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2"/>
-      <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"/>
-      <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"/>
-      <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"/>
-    </svg>
-  </div>
-</div>
+              {/* Wilaya Autocomplete Dropdown */}
+              {showWilayaDropdown && (
+                <div
+                  ref={dropdownRef}
+                  style={{
+                    position: 'absolute',
+                    top: 'calc(100% + 8px)',
+                    left: '-1px',
+                    width: '300px',
+                    background: 'white',
+                    borderRadius: '16px',
+                    border: '1px solid #e0e0e0',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                    maxHeight: '280px',
+                    overflowY: 'auto',
+                    zIndex: 200,
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#c9a84c #f5f5f5',
+                  }}
+                >
+                  {wilayaSuggestions.map((wilaya, index) => {
+                    const isHighlighted = index === highlightedWilaya;
+                    const termLower = searchDestination.toLowerCase();
+                    const nameLower = wilaya.name.toLowerCase();
+                    const matchIdx = nameLower.indexOf(termLower);
+                    return (
+                      <div
+                        key={wilaya.name}
+                        onMouseDown={(e) => { e.preventDefault(); handleWilayaSelect(wilaya.name); }}
+                        onMouseEnter={() => setHighlightedWilaya(index)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          padding: '10px 16px',
+                          cursor: 'pointer',
+                          background: isHighlighted ? 'rgba(201,168,76,0.08)' : 'transparent',
+                          borderBottom: index < wilayaSuggestions.length - 1 ? '1px solid #f0f0f0' : 'none',
+                          borderRadius: index === wilayaSuggestions.length - 1 ? '0 0 16px 16px' : '0',
+                          transition: 'background 0.1s',
+                        }}
+                      >
+                        {/* Emoji pill */}
+                        <span style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          background: 'rgba(201,168,76,0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '15px',
+                          flexShrink: 0,
+                        }}>
+                          {wilaya.emoji}
+                        </span>
+
+                        {/* Name with highlighted match */}
+                        <span style={{ fontSize: '14px', color: '#222', fontWeight: 500 }}>
+                          {matchIdx === -1 ? wilaya.name : (
+                            <>
+                              {wilaya.name.slice(0, matchIdx)}
+                              <span style={{ color: '#c9a84c', fontWeight: 700 }}>
+                                {wilaya.name.slice(matchIdx, matchIdx + searchDestination.length)}
+                              </span>
+                              {wilaya.name.slice(matchIdx + searchDestination.length)}
+                            </>
+                          )}
+                        </span>
+
+                        {/* Pin icon */}
+                        <svg style={{ marginLeft: 'auto', flexShrink: 0 }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isHighlighted ? '#c9a84c' : '#ccc'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                          <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Check In Field */}
+            <div style={{ flex: 1, padding: '14px 20px', borderRight: '1px solid #e0e0e0' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Check in</div>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="date"
+                  value={checkInDate}
+                  onChange={(e) => setCheckInDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  style={{
+                    width: '100%', border: 'none', outline: 'none', fontSize: '14px',
+                    background: 'transparent', fontFamily: 'inherit', color: '#333',
+                    opacity: checkInDate ? 1 : 0, cursor: 'pointer',
+                  }}
+                />
+                {!checkInDate && (
+                  <span style={{ position: 'absolute', left: 0, color: '#999', fontSize: '14px', pointerEvents: 'none' }}>
+                    Add date
+                  </span>
+                )}
+                <svg style={{ position: 'absolute', right: 0, width: '18px', height: '18px', color: '#999', pointerEvents: 'none' }}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2"/>
+                  <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"/>
+                  <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"/>
+                </svg>
+              </div>
+            </div>
+
+            {/* Check Out Field */}
+            <div style={{ flex: 1, padding: '14px 20px', borderRight: '1px solid #e0e0e0' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, marginBottom: '4px', color: '#333' }}>Check out</div>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="date"
+                  value={checkOutDate}
+                  onChange={(e) => setCheckOutDate(e.target.value)}
+                  min={checkInDate || new Date().toISOString().split('T')[0]}
+                  style={{
+                    width: '100%', border: 'none', outline: 'none', fontSize: '14px',
+                    background: 'transparent', fontFamily: 'inherit', color: '#333',
+                    opacity: checkOutDate ? 1 : 0, cursor: 'pointer',
+                  }}
+                />
+                {!checkOutDate && (
+                  <span style={{ position: 'absolute', left: 0, color: '#999', fontSize: '14px', pointerEvents: 'none' }}>
+                    Add date
+                  </span>
+                )}
+                <svg style={{ position: 'absolute', right: 0, width: '18px', height: '18px', color: '#999', pointerEvents: 'none' }}
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" strokeWidth="2"/>
+                  <line x1="8" y1="2" x2="8" y2="6" strokeWidth="2"/>
+                  <line x1="16" y1="2" x2="16" y2="6" strokeWidth="2"/>
+                  <line x1="3" y1="10" x2="21" y2="10" strokeWidth="2"/>
+                </svg>
+              </div>
+            </div>
+
             {/* Search Button */}
             <button
               onClick={performSearch}
               style={{
-                background: '#c9a84c',
-                border: 'none',
-                borderRadius: '40px',
-                width: '48px',
-                height: '48px',
-                margin: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'background 0.2s ease',
-                flexShrink: 0
+                background: '#c9a84c', border: 'none', borderRadius: '40px',
+                width: '48px', height: '48px', margin: '8px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', transition: 'background 0.2s ease', flexShrink: 0,
               }}
               onMouseEnter={(e) => e.currentTarget.style.background = '#b8963e'}
               onMouseLeave={(e) => e.currentTarget.style.background = '#c9a84c'}
@@ -455,19 +498,14 @@ function StaysPage({ showToast, onOpenBooking }) {
               </svg>
             </button>
           </div>
-          
+
           {/* Search Summary */}
           {searchPerformed && searchDestination && (
             <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: '#666' }}>
               <span>🔍 {listings.length} property(s) found in <strong>{searchDestination}</strong></span>
-              {numberOfDays > 0 && (
-                <span style={{ marginLeft: '15px' }}>📅 {numberOfDays} days ({rentalType} rate)</span>
-              )}
+              {numberOfDays > 0 && <span style={{ marginLeft: '15px' }}>📅 {numberOfDays} days ({rentalType} rate)</span>}
               {guestCount && <span style={{ marginLeft: '15px' }}>👥 {guestCount} guest(s)</span>}
-              <button 
-                onClick={clearSearch}
-                style={{ marginLeft: '15px', background: 'none', border: 'none', color: '#c9a84c', cursor: 'pointer', textDecoration: 'underline' }}
-              >
+              <button onClick={clearSearch} style={{ marginLeft: '15px', background: 'none', border: 'none', color: '#c9a84c', cursor: 'pointer', textDecoration: 'underline' }}>
                 Clear
               </button>
             </div>
@@ -483,16 +521,12 @@ function StaysPage({ showToast, onOpenBooking }) {
               key={cat}
               onClick={() => filterCategory(cat)}
               style={{
-                padding: '8px 0',
-                background: 'transparent',
+                padding: '8px 0', background: 'transparent',
                 color: activeCategory === cat ? '#c9a84c' : '#666',
                 border: 'none',
                 borderBottom: activeCategory === cat ? '2px solid #c9a84c' : '2px solid transparent',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 500,
-                transition: 'all 0.2s',
-                whiteSpace: 'nowrap'
+                cursor: 'pointer', fontSize: '14px', fontWeight: 500,
+                transition: 'all 0.2s', whiteSpace: 'nowrap',
               }}
             >
               {cat === 'all' ? 'All Properties' : cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -509,10 +543,7 @@ function StaysPage({ showToast, onOpenBooking }) {
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏠</div>
               <h3>No properties found</h3>
               <p style={{ marginTop: '8px' }}>Try adjusting your search criteria</p>
-              <button 
-                onClick={clearSearch}
-                style={{ marginTop: '20px', padding: '10px 24px', background: '#c9a84c', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
-              >
+              <button onClick={clearSearch} style={{ marginTop: '20px', padding: '10px 24px', background: '#c9a84c', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>
                 Start New Search
               </button>
             </div>
@@ -526,75 +557,38 @@ function StaysPage({ showToast, onOpenBooking }) {
               }, {})
             ).map(([groupName, items]) => (
               <div key={groupName} style={{ marginBottom: '40px' }}>
-                <h2 style={{ fontSize: '22px', fontWeight: 600, color: '#222', marginBottom: '20px' }}>
-                  {groupName}
-                </h2>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                  gap: '24px'
-                }}>
+                <h2 style={{ fontSize: '22px', fontWeight: 600, color: '#222', marginBottom: '20px' }}>{groupName}</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
                   {items.map(l => (
                     <div
                       key={l.property_id}
-                      style={{ 
-                        cursor: 'pointer', 
-                        background: 'white', 
-                        borderRadius: '12px', 
-                        overflow: 'hidden',
-                        transition: 'transform 0.2s, box-shadow 0.2s',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                      style={{
+                        cursor: 'pointer', background: 'white', borderRadius: '12px', overflow: 'hidden',
+                        transition: 'transform 0.2s, box-shadow 0.2s', boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                       }}
                       onClick={() => navigate(`/property/${l.property_id}`)}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-4px)';
-                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)'; }}
                     >
                       <div style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', overflow: 'hidden' }}>
                         <img
-                          src={getFirstImage(l)}
-                          alt={l.title}
+                          src={getFirstImage(l)} alt={l.title}
                           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                           onError={(e) => { e.target.src = 'https://picsum.photos/id/104/600/450'; }}
                         />
                         {l.badge && (
-                          <div style={{
-                            position: 'absolute', top: 12, left: 12,
-                            background: '#fff', color: '#222',
-                            fontSize: 12, fontWeight: 500,
-                            padding: '4px 10px', borderRadius: 20,
-                          }}>
+                          <div style={{ position: 'absolute', top: 12, left: 12, background: '#fff', color: '#222', fontSize: 12, fontWeight: 500, padding: '4px 10px', borderRadius: 20 }}>
                             {l.badge}
                           </div>
                         )}
                         {searchPerformed && numberOfDays > 0 && l.rental_type === rentalType && (
-                          <div style={{
-                            position: 'absolute', bottom: 12, right: 12,
-                            background: 'rgba(0,0,0,0.75)',
-                            color: '#c9a84c',
-                            fontSize: 11, fontWeight: 600,
-                            padding: '4px 8px', borderRadius: 4
-                          }}>
+                          <div style={{ position: 'absolute', bottom: 12, right: 12, background: 'rgba(0,0,0,0.75)', color: '#c9a84c', fontSize: 11, fontWeight: 600, padding: '4px 8px', borderRadius: 4 }}>
                             Total: {Math.round(l.price * 240 * (rentalType === 'day' ? numberOfDays : rentalType === 'month' ? Math.ceil(numberOfDays / 30) : numberOfDays / 365)).toLocaleString('fr-DZ')} DA
                           </div>
                         )}
-                        <button
-                          onClick={(e) => toggleWishlist(e, l.property_id)}
-                          style={{
-                            position: 'absolute', top: 12, right: 12,
-                            background: 'none', border: 'none', cursor: 'pointer', padding: 4,
-                          }}
-                        >
+                        <button onClick={(e) => toggleWishlist(e, l.property_id)} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
                           <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
-                            <path
-                              d="M16 28C16 28 4 20 4 12C4 8.686 6.686 6 10 6C12.2 6 14.1 7.2 16 9.2C17.9 7.2 19.8 6 22 6C25.314 6 28 8.686 28 12C28 20 16 28 16 28Z"
-                              stroke="white" strokeWidth="2.5" fill="rgba(0,0,0,0.25)"
-                            />
+                            <path d="M16 28C16 28 4 20 4 12C4 8.686 6.686 6 10 6C12.2 6 14.1 7.2 16 9.2C17.9 7.2 19.8 6 22 6C25.314 6 28 8.686 28 12C28 20 16 28 16 28Z" stroke="white" strokeWidth="2.5" fill="rgba(0,0,0,0.25)"/>
                           </svg>
                         </button>
                       </div>
@@ -606,9 +600,7 @@ function StaysPage({ showToast, onOpenBooking }) {
                             <span>★</span> {l.avgRating?.toFixed(1) || 'New'}
                           </div>
                         </div>
-                        <p style={{ fontSize: '13px', color: '#717171', margin: '0 0 4px 0' }}>
-                          {l.wilaya || l.location}
-                        </p>
+                        <p style={{ fontSize: '13px', color: '#717171', margin: '0 0 4px 0' }}>{l.wilaya || l.location}</p>
                         <p style={{ fontSize: '12px', color: '#999', margin: '0 0 8px 0' }}>
                           🛏️ {l.chambres || '?'} bed • 🚿 {l.salle_de_bain || '?'} bath • 👥 {l.voyageurs || '?'} guests
                         </p>
